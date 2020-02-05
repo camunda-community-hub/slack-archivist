@@ -25,6 +25,7 @@
     "@slack/events-api": "^2.3.1",
     "@slack/web-api": "^5.7.0",
     "@types/node": "^13.7.0",
-    "axios": "^0.19.2"
+    "axios": "^0.19.2",
+    "typescript": "^3.7.5"
   }
 }

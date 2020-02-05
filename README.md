@@ -26,12 +26,6 @@ To install, clone the repository, then run:
 npm i
 ```
 
-You need the TypeScript compiler installed, which you can do with: 
-
-```
-npm i -g typescript
-```
-
 ## Configuration
 
 Rename `config.json-example` to `config.json`, and fill in your Slack bot and Discord details.
