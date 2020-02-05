@@ -2,7 +2,7 @@ version: "2"
 
 services:
   archivist:
-    image: jwulf/slack-archivist:latest
+    image: sitapati/slack-archivist:latest
     container_name: slack-archivist
     ports:
       - "80:3000"
