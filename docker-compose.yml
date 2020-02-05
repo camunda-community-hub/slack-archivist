@@ -1,0 +1,15 @@
+version: "2"
+
+services:
+  archivist:
+    image: jwulf/slack-archivist:latest
+    container_name: slack-archivist
+    ports:
+      - "80:3000"
+    environment:
+      - DISCOURSE_TOKEN=
+      - DISCOURSE_USER=
+      - DISCOURSE_CATEGORY=
+      - DISCOURSE_URL=
+      - SLACK_BOT_TOKEN=
+      - SLACK_SIGNING_SECRET=
