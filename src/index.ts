@@ -16,8 +16,6 @@ const config = require("../config");
 const token = process.env.SLACK_BOT_TOKEN || config?.slack?.bot_token || "";
 const slackSigningSecret =
   process.env.SLACK_SIGNING_SECRET || config?.slack?.signing_secret || "";
-const initialChannel =
-  process.env.SLACK_INITIAL_CHANNEL || config?.slack?.initial_channel || "";
 
 const slackEvents: SlackEventAdapter & EventEmitter = createEventAdapter(
   slackSigningSecret
@@ -141,10 +139,6 @@ slackEvents.on("link_shared", async (event: SlackMessageEvent) => {
 slackEvents.on("channel_joined", event => console.log);
 
 (async () => {
-  // const channels = ["CT7S20JG3"];
-  web.channels.join({
-    name: initialChannel
-  });
   const server = await slackEvents.start(parseInt(serverPort));
 
   const address = server.address();

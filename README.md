@@ -14,13 +14,21 @@ We looked at doing that, but then saw an opportunity to build a searchable knowl
 
 Dgraph had a similar idea a few years ago, and built Wisemonk in Go. It hasn't been updated for a few years, and I couldn't get it to work - so I coded this up in TypeScript, using Slack's Web API and Events API.
 
+## Using in Slack
+
+In a thread (this is important - your conversations need to be threaded), @ the bot with what you want as the title. The bot will then roll up the thread and turn it into a forum post.
+
+Example:
+
+![](img/example.png)
+
+Here is [the post](https://forum.zeebe.io/t/zeebe-failover/980) generated from this thread.
+
 ## Prerequisites
 
-Obviously you will need a Slack where you can add bot users, and a Discourse instance where you can get an API key. You will also need to run the bot with a resolvable DNS address, as it needs to listen to Push notifications from Slack's Event API.
+Obviously you will need a Slack where you can add bot users, and a Discourse instance where you can get an API key. You will also need to run the bot with a resolvable DNS address, or at least an external IP, as it needs to listen to Push notifications from Slack's Event API.
 
 ## Running from Docker
-
-Your host needs an external IP at least, for Slack to be able to reach it.
 
 Read the `docker-compose.yml` file and set up either the environment variables or a `config.json`. Then run:
 
@@ -45,7 +53,6 @@ Rename `config.json-example` to `config.json`, and fill in your Slack bot and Di
     slack: {
         "bot_token": "",
         "signing_secret": "",
-        "initial_channel": ""
     },
     "discourse": {
         "token": "",
@@ -65,7 +72,6 @@ DISCOURSE_CATEGORY
 DISCOURSE_URL
 SLACK_BOT_TOKEN
 SLACK_SIGNING_SECRET
-SLACK_INITIAL_CHANNEL
 ```
 
 ## Running
