@@ -28,6 +28,26 @@ Here is [the post](https://forum.zeebe.io/t/zeebe-failover/980) generated from t
 
 Obviously you will need a Slack where you can add bot users, and a Discourse instance where you can get an API key. You will also need to run the bot with a resolvable DNS address, or at least an external IP, as it needs to listen to Push notifications from Slack's Event API.
 
+Here are the [instructions about creating a bot user on Slack](https://api.slack.com/bot-users). You only need to do steps 1 - 3.
+
+The bot will need the following scopes in its OAuth settings:
+
+* app_mentions:read
+* channels:history
+* channels:join
+* channels:read
+* chat:write
+* im:history
+* im:read
+* im:write
+* incoming-webhook
+* links:read
+* links:write
+* reactions:write
+* users.profile:read
+* users:read
+* users:write
+
 ## Running from Docker
 
 Read the `docker-compose.yml` file and set up either the environment variables or a `config.json`. Then run:
@@ -36,7 +56,7 @@ Read the `docker-compose.yml` file and set up either the environment variables o
 docker-compose up -d
 ```
 
-## Installation
+## Installation from source
 
 To install, clone the repository, then run: 
 
@@ -46,7 +66,7 @@ npm i
 
 ## Configuration
 
-Rename `config.json-example` to `config.json`, and fill in your Slack bot and Discord details. The initial channel looks like "CT7S20JG3". You can Google to find out how to get your channel id.
+Rename `config.json-example` to `config.json`, and fill in your Slack bot and Discord details. 
 
 ```
 {
