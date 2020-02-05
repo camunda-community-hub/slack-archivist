@@ -38,13 +38,14 @@ npm i
 
 ## Configuration
 
-Rename `config.json-example` to `config.json`, and fill in your Slack bot and Discord details.
+Rename `config.json-example` to `config.json`, and fill in your Slack bot and Discord details. The initial channel looks like "CT7S20JG3". You can Google to find out how to get your channel id.
 
 ```
 {
     slack: {
         "bot_token": "",
-        "signing_secret": ""
+        "signing_secret": "",
+        "initial_channel": ""
     },
     "discourse": {
         "token": "",
@@ -64,6 +65,7 @@ DISCOURSE_CATEGORY
 DISCOURSE_URL
 SLACK_BOT_TOKEN
 SLACK_SIGNING_SECRET
+SLACK_INITIAL_CHANNEL
 ```
 
 ## Running
