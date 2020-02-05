@@ -14,6 +14,6 @@ RUN chown node:node .
 USER node
 COPY package*.json ./
 RUN npm install && echo "{}" > config.json
-COPY --from=builder /usr/src/app/lib/ lib/
+COPY --from=builder /usr/src/app/dist/ dist/
 EXPOSE 3000
 ENTRYPOINT [ "/sbin/tini","--", "node", "dist/index.js" ]
