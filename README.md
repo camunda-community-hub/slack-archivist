@@ -12,11 +12,13 @@ One of the issues with hosting a community on Slack is the loss of history. Valu
 
 We looked at doing that, but then saw an opportunity to build a searchable knowledge base on our [forum](https://forum.zeebe.io) by sending valuable threads there as posts. There they can be curated by editors, indexed by Google, and discovered by other members of our community searching for answers.
 
-Dgraph had a similar idea a few years ago, and built Wisemonk in Go. It hasn't been updated for a few years, and I couldn't get it to work - so I coded this up in TypeScript.
+Dgraph had a similar idea a few years ago, and built Wisemonk in Go. It hasn't been updated for a few years, and I couldn't get it to work - so I coded this up in TypeScript, using Slack's Web API and Events API.
 
-## Usage
+## Prerequisites
 
 Obviously you will need a Slack where you can add bot users, and a Discourse instance where you can get an API key. You will also need to run the bot with a resolvable DNS address, as it needs to listen to Push notifications from Slack's Event API.
+
+## Installation
 
 To install, clone the repository, then run: 
 
@@ -30,7 +32,37 @@ You need the TypeScript compiler installed, which you can do with:
 npm i -g typescript
 ```
 
+## Configuration
+
 Rename `config.json-example` to `config.json`, and fill in your Slack bot and Discord details.
+
+```
+{
+    slack: {
+        "bot_token": "",
+        "signing_secret": ""
+    },
+    "discourse": {
+        "token": "",
+        "user": "",
+        "url": "with a trailing slash",
+        "category": 1
+    }
+}
+```
+
+You can also configure Slack Archivist via environment variables:
+
+```
+DISCOURSE_TOKEN
+DISCOURSE_USER
+DISCOURSE_CATEGORY
+DISCOURSE_URL
+SLACK_BOT_TOKEN
+SLACK_SIGNING_SECRET
+```
+
+## Running
 
 You can run the bot using `ts-node`: 
 

@@ -8,7 +8,7 @@ const discourse = config?.discourse;
 const discourseToken = process.env.DISCOURSE_TOKEN || discourse?.token || "";
 const discourseUser = process.env.DISCOURSE_USER || discourse?.user || "";
 const discourseCategory =
-  process.env.DISCOURSE_URL || discourse?.category || "";
+  process.env.DISCOURSE_CATEGORY || discourse?.category || "";
 const discourseUrl = process.env.DISCOURSE_URL || discourse?.url || "";
 
 const http = Axios.create({
