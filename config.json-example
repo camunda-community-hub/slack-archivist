@@ -1,0 +1,12 @@
+{
+    slack: {
+        "bot_token": "",
+        "signing_secret": ""
+    },
+    "discourse": {
+        "token": "",
+        "user": "",
+        "url": "with a trailing slash",
+        "category": 1
+    }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "slack-archivist",
+  "version": "1.0.0",
+  "description": "A Slackbot that archives threads to Discourse and suggests previous threads that may answer a user question",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jwulf/slack-archivist.git"
+  },
+  "keywords": [
+    "slackbot"
+  ],
+  "author": "Josh Wulf <josh@magikcraft.io>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jwulf/slack-archivist/issues"
+  },
+  "homepage": "https://github.com/jwulf/slack-archivist#readme",
+  "dependencies": {
+    "@slack/events-api": "^2.3.1",
+    "@slack/web-api": "^5.7.0",
+    "@types/node": "^13.7.0",
+    "axios": "^0.19.2"
+  }
+}
