@@ -6,10 +6,15 @@ services:
     container_name: slack-archivist
     ports:
       - "80:3000"
-    environment:
-      - DISCOURSE_TOKEN=
-      - DISCOURSE_USER=
-      - DISCOURSE_CATEGORY=
-      - DISCOURSE_URL=
-      - SLACK_BOT_TOKEN=
-      - SLACK_SIGNING_SECRET=
+    # Use Exactly One of the following configuration methods
+    # Option 1: Set these environment variables in here:
+    # environment:
+    #   - DISCOURSE_TOKEN=
+    #   - DISCOURSE_USER=
+    #   - DISCOURSE_CATEGORY=
+    #   - DISCOURSE_URL=
+    #   - SLACK_BOT_TOKEN=
+    #   - SLACK_SIGNING_SECRET=
+    # Option 2: use a config.json on the local filesystem:
+    # volumes:
+    #   - "./config.json:/usr/src/app/config.json"

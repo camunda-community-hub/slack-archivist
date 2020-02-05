@@ -18,6 +18,16 @@ Dgraph had a similar idea a few years ago, and built Wisemonk in Go. It hasn't b
 
 Obviously you will need a Slack where you can add bot users, and a Discourse instance where you can get an API key. You will also need to run the bot with a resolvable DNS address, as it needs to listen to Push notifications from Slack's Event API.
 
+## Running from Docker
+
+Your host needs an external IP at least, for Slack to be able to reach it.
+
+Read the `docker-compose.yml` file and set up either the environment variables or a `config.json`. Then run:
+
+```
+docker-compose up -d
+```
+
 ## Installation
 
 To install, clone the repository, then run: 
