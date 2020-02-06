@@ -1,8 +1,3 @@
-export const isThreadedMessage = (event: SlackMessageEvent) =>
-  !!event.thread_ts;
-export const isThreadParent = (event: SlackMessageEvent) =>
-  event.thread_ts === event.ts;
-
 export interface SlackMessageEvent {
   client_msg_id: string;
   type: string;

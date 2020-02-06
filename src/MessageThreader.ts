@@ -1,0 +1,39 @@
+import { SlackMessageEvent } from "./SlackMessage";
+import { UserDictionary } from "./PostBuilder";
+
+export interface ParsedMessage {
+  text: string;
+  user: string;
+}
+
+export function threadMessages(messages: SlackMessageEvent[]) {
+  const messageIsThreadParent = (event: SlackMessageEvent) =>
+    event.thread_ts === event.ts;
+
+  const threadParentMessage = messages.filter(messageIsThreadParent)[0];
+
+  // Reorder the message according to the threading metadata. They are not ordered in the array.
+  const orderedRepliesIndex =
+    threadParentMessage.replies?.map(reply => reply.ts) || []; // Allows a single post to be archived by calling the bot in the first thread message
+  const messageThread = [threadParentMessage];
+  orderedRepliesIndex.forEach(replyts => {
+    const reply = messages.filter(msg => msg.ts == replyts);
+    if (reply.length === 1) {
+      messageThread.push(reply[0]);
+    }
+  });
+  return messageThread;
+}
+
+export function replaceUsercodesWithNames(
+  messageThread: SlackMessageEvent[],
+  userMap: UserDictionary[]
+): ParsedMessage[] {
+  // replace the user code in the messages with the name, and return just text and username
+  // @TODO - replace in-line text occurrences of user codes with the username
+  return messageThread.map(message => {
+    const username = userMap.filter(user => message.user === user.usercode);
+    const user = username.length === 1 ? username[0].username : message.user;
+    return { user, text: message.text };
+  });
+}
