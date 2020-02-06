@@ -33,62 +33,61 @@ class SlackConfig {
 class Configuration {
   discourse: DiscourseConfig = {} as DiscourseConfig;
   slack: SlackConfig = {} as SlackConfig;
-
+  ready: Promise<undefined>;
+  isValid: boolean | undefined;
+  missingRequiredKeys: string[] | undefined;
   constructor() {
-    let config: any = {};
+    this.ready = new Promise(res => {
+      let config: any = {};
 
-    try {
-      config = require("../config");
-    } catch (e) {
-      console.log(
-        "Error loading ../config.json - using environment variables only for configuration."
-      );
-    }
-    const discourseConfig: DiscourseConfig = {} as DiscourseConfig;
-    // Discourse
-    const discourse = config?.discourse;
-    discourseConfig.token =
-      process.env.DISCOURSE_TOKEN ||
-      discourse?.token ||
-      ((null as unknown) as string);
-    discourseConfig.user = process.env.DISCOURSE_USER || discourse?.user;
-    discourseConfig.category =
-      process.env.DISCOURSE_CATEGORY ||
-      discourse?.category ||
-      ((null as unknown) as string);
-    discourseConfig.url =
-      process.env.DISCOURSE_URL ||
-      discourse?.url ||
-      ((null as unknown) as string);
-    this;
-    this.discourse = new DiscourseConfig(discourseConfig);
+      try {
+        config = require("../config");
+      } catch (e) {
+        console.log(
+          "Error loading ../config.json - using environment variables only for configuration."
+        );
+      }
+      const discourseConfig: DiscourseConfig = {} as DiscourseConfig;
+      // Discourse
+      const discourse = config?.discourse;
+      discourseConfig.token =
+        process.env.DISCOURSE_TOKEN ||
+        discourse?.token ||
+        ((null as unknown) as string);
+      discourseConfig.user = process.env.DISCOURSE_USER || discourse?.user;
+      discourseConfig.category =
+        process.env.DISCOURSE_CATEGORY ||
+        discourse?.category ||
+        ((null as unknown) as string);
+      discourseConfig.url =
+        process.env.DISCOURSE_URL ||
+        discourse?.url ||
+        ((null as unknown) as string);
+      this;
+      this.discourse = new DiscourseConfig(discourseConfig);
 
-    // Slack
-    const slackConfig: SlackConfig = {} as SlackConfig;
+      // Slack
+      const slackConfig: SlackConfig = {} as SlackConfig;
 
-    slackConfig.token =
-      process.env.SLACK_BOT_TOKEN ||
-      config?.slack?.bot_token ||
-      ((null as unknown) as string); // null for required property
-    slackConfig.signingSecret =
-      process.env.SLACK_SIGNING_SECRET ||
-      config?.slack?.signing_secret ||
-      ((null as unknown) as string);
-    slackConfig.promoMessage =
-      process.env.SLACK_PROMO_MESSAGE ||
-      config?.slack?.promo_message ||
-      undefined; // undefined for optional
-    this.slack = new SlackConfig(slackConfig);
+      slackConfig.token =
+        process.env.SLACK_BOT_TOKEN ||
+        config?.slack?.bot_token ||
+        ((null as unknown) as string); // null for required property
+      slackConfig.signingSecret =
+        process.env.SLACK_SIGNING_SECRET ||
+        config?.slack?.signing_secret ||
+        ((null as unknown) as string);
+      slackConfig.promoMessage =
+        process.env.SLACK_PROMO_MESSAGE ||
+        config?.slack?.promo_message ||
+        undefined; // undefined for optional
+      this.slack = new SlackConfig(slackConfig);
+      res();
+    });
   }
 
-  validate():
-    | {
-        isValid: true;
-      }
-    | {
-        isValid: false;
-        missingRequiredKeys: string[];
-      } {
+  async validate(): Promise<Configuration> {
+    await this.ready;
     const missingRequiredKeys = Object.keys({
       discourse: this.getNullKeys(this.discourse),
       slack: this.getNullKeys(this.slack)
@@ -100,12 +99,9 @@ class Configuration {
       )
       .filter(configKey => !!configKey);
 
-    const isValid = missingRequiredKeys.length > 0;
-    return isValid
-      ? {
-          isValid: true
-        }
-      : { isValid: false, missingRequiredKeys: missingRequiredKeys };
+    this.isValid = missingRequiredKeys.length > 0;
+    this.missingRequiredKeys = this.isValid ? undefined : missingRequiredKeys;
+    return this;
   }
 
   private getNullKeys(config: object) {
