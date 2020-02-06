@@ -19,16 +19,19 @@ export class PostBuilder {
   ) {
     const messageThread = threadMessages(messages);
 
-    const parsedMessages = replaceUsercodesWithNames(messages, userMap);
+    const parsedMessageThread = replaceUsercodesWithNames(
+      messageThread,
+      userMap
+    );
 
     if (this.slackPromoMessage) {
-      parsedMessages.push({
+      parsedMessageThread.push({
         user: "Note",
         text: this.slackPromoMessage
       });
     }
 
-    return messageThread.reduce(
+    return parsedMessageThread.reduce(
       (prev, message) => `${prev}
 
 **${message.user}**: ${message.text}`,
