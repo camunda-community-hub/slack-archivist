@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,8 @@
     "typescript": "^3.7.5"
   },
   "devDependencies": {
-    "jest": "^25.1.0"
+    "@types/jest": "^25.1.2",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.2.0"
   }
 }

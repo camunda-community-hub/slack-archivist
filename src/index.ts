@@ -5,16 +5,25 @@ import { SlackMessageEvent } from "./SlackMessage";
 import { getAll } from "./webapi-pagination";
 import { UserNameLookupService } from "./UserNameLookupService";
 import { DiscourseAPI } from "./Discourse";
-import { slackPromoMessage, slackSigningSecret, token } from "./Configurator";
+import { configuration as config } from "./Configurator";
 import { PostBuilder } from "./PostBuilder";
 
-const slackEvents = createEventAdapter(slackSigningSecret) as any;
+const configValid = config.validate();
 
-const discourseAPI = new DiscourseAPI();
+if (!configValid.isValid) {
+  console.log("Missing required configuration to run!");
+  console.log("Missing values for: ");
+  console.log(JSON.stringify(configValid.missingRequiredKeys, null, 2));
+  process.exit(1);
+}
 
-const web = new WebClient(token);
+const slackEvents = createEventAdapter(config.slack.signingSecret) as any;
+
+const discourseAPI = new DiscourseAPI(config.discourse);
+
+const web = new WebClient(config.slack.token);
 const userlookup = new UserNameLookupService(web);
-const postBuilder = new PostBuilder(slackPromoMessage);
+const postBuilder = new PostBuilder(config.slack.promoMessage);
 
 const serverPort = process.env.PORT || "3000";
 
@@ -54,22 +63,22 @@ slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
     event.thread_ts!
   );
 
-  try {
-    const url = await discourseAPI.post(title, discoursePost);
+  const res = await discourseAPI.post(title, discoursePost);
 
-    web.chat.postMessage({
+  if (res.success) {
+    return web.chat.postMessage({
       channel: event.channel,
       thread_ts: event.thread_ts,
-      text: `Gosh, this _is_ an interesting conversation - I've filed a copy at ${url} for future reference!`
+      text: `Gosh, this _is_ an interesting conversation - I've filed a copy at ${res.url} for future reference!`
     });
-  } catch (e) {
-    web.chat.postMessage({
-      channel: event.channel,
-      thread_ts: event.thread_ts,
-      text: `Sorry! Something went wrong - please ask @Josh Wulf to take a look`
-    });
-    console.log(e);
   }
+  web.chat.postMessage({
+    channel: event.channel,
+    thread_ts: event.thread_ts,
+    text: `Sorry! I couldn't archive that. Discourse responded with: ${JSON.stringify(
+      res.message
+    )}`
+  });
 });
 
 async function makePostFromMessagesInThread(
@@ -86,6 +95,7 @@ async function makePostFromMessagesInThread(
     "messages"
   );
 
+  console.log(JSON.stringify(messages, null, 2));
   // Remove the last message, because it is the call to the bot
   messages.pop();
 
