@@ -16,4 +16,4 @@ COPY package*.json ./
 RUN npm install && echo "{}" > config.json
 COPY --from=builder /usr/src/app/dist/ dist/
 EXPOSE 3000
-ENTRYPOINT [ "/sbin/tini","--", "node", "dist/index.js" ]
+ENTRYPOINT [ "/sbin/tini","--", "node", "dist/main.js" ]

@@ -104,7 +104,7 @@ You can run the bot using `ts-node`:
 
 ```
 npm i -g ts-node
-ts-node src/index.ts
+ts-node src/main.ts
 ```
 
 Or by transpiling to JS:
