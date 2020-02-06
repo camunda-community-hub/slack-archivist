@@ -2,7 +2,7 @@
 // https://meta.discourse.org/t/how-to-reverse-engineer-the-discourse-api/20576
 // https://meta.discourse.org/t/how-to-turn-off-a-checker-for-title-seems-unclear-is-it-a-complete-sentence/55070/12
 import Axios from "axios";
-import { DiscourseConfigObject } from "./Configurator";
+import { DiscourseConfigObject } from "./Configuration";
 
 export class DiscourseAPI {
   private http: any;
