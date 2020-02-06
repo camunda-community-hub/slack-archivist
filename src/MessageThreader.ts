@@ -31,9 +31,36 @@ export function replaceUsercodesWithNames(
 ): ParsedMessage[] {
   // replace the user code in the messages with the name, and return just text and username
   // @TODO - replace in-line text occurrences of user codes with the username
-  return messageThread.map(message => {
-    const username = userMap.filter(user => message.user === user.usercode);
-    const user = username.length === 1 ? username[0].username : message.user;
-    return { user, text: message.text };
-  });
+  return messageThread
+    .map(message => ({
+      user: getUsernameFromCode(message.user, userMap),
+      text: message.text
+    }))
+    .map(message => ({
+      ...message,
+      text: replaceUsercodesInText(message.text, userMap)
+    }));
+}
+
+function getUsernameFromCode(usercode: string, userMap: UserDictionary[]) {
+  const username = userMap.filter(user => usercode === user.usercode);
+  return username.length === 1 ? username[0].username : usercode;
+}
+
+// Assumes all Slack usercodes have 9 chars
+function replaceUsercodesInText(text: string, userMap: UserDictionary[]) {
+  const start = text.indexOf("@<");
+  if (start === -1) {
+    return text;
+  }
+  if (text.substring(start + 11, 1) === ">") {
+    const substring = text.substring(start, 12);
+    const usercode = substring.substring(2, 11);
+    const username = getUsernameFromCode(usercode, userMap);
+    return replaceUsercodesInText(
+      text.replace(substring, `@${username}`),
+      userMap
+    );
+  }
+  return text;
 }
