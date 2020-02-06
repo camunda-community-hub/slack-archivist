@@ -17,21 +17,20 @@ export class PostBuilder {
     messages: SlackMessageEvent[],
     userMap: UserDictionary[]
   ) {
-    const messageThread = threadMessages(messages);
+    const optionallyAddSlackPromo = messages =>
+      this.slackPromoMessage
+        ? [
+            ...messages,
+            {
+              user: "Note",
+              text: this.slackPromoMessage
+            }
+          ]
+        : messages;
 
-    const parsedMessageThread = replaceUsercodesWithNames(
-      messageThread,
-      userMap
-    );
-
-    if (this.slackPromoMessage) {
-      parsedMessageThread.push({
-        user: "Note",
-        text: this.slackPromoMessage
-      });
-    }
-
-    return parsedMessageThread.reduce(
+    return optionallyAddSlackPromo(
+      replaceUsercodesWithNames(threadMessages(messages), userMap)
+    ).reduce(
       (prev, message) => `${prev}
 
 **${message.user}**: ${message.text}`,
