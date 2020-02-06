@@ -34,8 +34,13 @@ export class Configuration {
   discourse: DiscourseConfig = {} as DiscourseConfig;
   slack: SlackConfig = {} as SlackConfig;
   isValid: boolean | undefined;
-  missingRequiredKeys: any;
+  missingRequiredKeys?: any;
   constructor(config: any = {}) {
+    if (!config) {
+      console.log(
+        "No config provided - using environment variables for configuration."
+      );
+    }
     const discourseConfig: DiscourseConfig = {} as DiscourseConfig;
     // Discourse
     const discourse = config?.discourse;
@@ -60,33 +65,30 @@ export class Configuration {
 
     slackConfig.token =
       process.env.SLACK_BOT_TOKEN ||
-      config?.slack?.bot_token ||
+      config?.slack?.token ||
       ((null as unknown) as string); // null for required property
     slackConfig.signingSecret =
       process.env.SLACK_SIGNING_SECRET ||
-      config?.slack?.signing_secret ||
+      config?.slack?.signingSecret ||
       ((null as unknown) as string);
     slackConfig.promoMessage =
       process.env.SLACK_PROMO_MESSAGE ||
-      config?.slack?.promo_message ||
+      config?.slack?.promoMessage ||
       undefined; // undefined for optional
     this.slack = new SlackConfig(slackConfig);
   }
 
   validate(): Configuration {
-    const missingRequiredKeys = Object.keys({
+    const missingRequiredKeys = {
       discourse: this.getNullKeys(this.discourse),
       slack: this.getNullKeys(this.slack)
-    });
-    const missingRequiredKeyList = missingRequiredKeys
-      .map(configKey =>
-        missingRequiredKeys[configKey]
-          ? { [configKey]: missingRequiredKeys[configKey] }
-          : undefined
-      )
-      .filter(configKey => !!configKey);
-
-    this.isValid = missingRequiredKeyList.length > 0;
+    };
+    for (const key in missingRequiredKeys) {
+      if (!missingRequiredKeys[key]) {
+        delete missingRequiredKeys[key];
+      }
+    }
+    this.isValid = Object.keys(missingRequiredKeys).length === 0;
     this.missingRequiredKeys = this.isValid ? undefined : missingRequiredKeys;
     return this;
   }

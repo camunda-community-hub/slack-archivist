@@ -11,10 +11,9 @@ import { PostBuilder } from "./PostBuilder";
 let configJSON;
 try {
   configJSON = require("../config");
+  console.log("Loaded configuration from config.json");
 } catch (e) {
-  console.log(
-    "Error loading ../config.json - using environment variables only for configuration."
-  );
+  console.log("Error loading ../config.json.");
 }
 
 const config = new Configuration(configJSON).validate();
