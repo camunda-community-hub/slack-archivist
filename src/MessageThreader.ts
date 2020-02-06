@@ -49,12 +49,12 @@ function getUsernameFromCode(usercode: string, userMap: UserDictionary[]) {
 
 // Assumes all Slack usercodes have 9 chars
 function replaceUsercodesInText(text: string, userMap: UserDictionary[]) {
-  const start = text.indexOf("@<");
+  const start = text.indexOf("<@");
   if (start === -1) {
     return text;
   }
-  if (text.substring(start + 11, 1) === ">") {
-    const substring = text.substring(start, 12);
+  if (text.substr(start + 11, 1) === ">") {
+    const substring = text.substr(start, 12);
     const usercode = substring.substring(2, 11);
     const username = getUsernameFromCode(usercode, userMap);
     return replaceUsercodesInText(
@@ -64,3 +64,9 @@ function replaceUsercodesInText(text: string, userMap: UserDictionary[]) {
   }
   return text;
 }
+
+console.log(
+  replaceUsercodesInText("<@UTM6C2C3H>", [
+    { usercode: "UTM6C2C3H", username: "archivist" }
+  ])
+);
