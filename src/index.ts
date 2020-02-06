@@ -68,6 +68,7 @@ slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
       thread_ts: event.thread_ts,
       text: `Sorry! Something went wrong - please ask @Josh Wulf to take a look`
     });
+    console.log(e);
   }
 });
 
@@ -84,6 +85,9 @@ async function makePostFromMessagesInThread(
     },
     "messages"
   );
+
+  //debug
+  console.log(JSON.stringify(messages));
 
   // Remove the last message, because it is the call to the bot
   messages.pop();
