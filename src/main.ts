@@ -106,7 +106,8 @@ async function makePostFromMessagesInThread(
     "messages"
   );
 
-  console.log(JSON.stringify(messages, null, 2));
+  console.log(JSON.stringify(messages)); // debug
+
   // Remove the last message, because it is the call to the bot
   messages.pop();
 
