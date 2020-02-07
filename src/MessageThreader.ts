@@ -72,8 +72,9 @@ function replaceUsercodesInText(text: string, userMap: UserDictionary[]) {
   return text;
 }
 
-console.log(
-  replaceUsercodesInText("<@UTM6C2C3H>", [
-    { usercode: "UTM6C2C3H", username: "archivist" }
-  ])
-);
+// @TODO - move to test
+// console.log(
+//   replaceUsercodesInText("<@UTM6C2C3H>", [
+//     { usercode: "UTM6C2C3H", username: "archivist" }
+//   ])
+// );
