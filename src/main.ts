@@ -1,30 +1,40 @@
 import { createEventAdapter } from "@slack/events-api";
 import { WebClient } from "@slack/web-api";
 import { AddressInfo } from "net";
-import SlackEventAdapter from "@slack/events-api/dist/adapter";
-import { EventEmitter } from "events";
-import {
-  isThreadedMessage,
-  isThreadParent,
-  SlackMessageEvent
-} from "./SlackMessage";
+import { SlackMessageEvent } from "./SlackMessage";
 import { getAll } from "./webapi-pagination";
 import { UserNameLookupService } from "./UserNameLookupService";
 import { DiscourseAPI } from "./Discourse";
-const config = require("../config");
+import { Configuration } from "./Configuration";
+import { PostBuilder } from "./PostBuilder";
 
-const token = process.env.SLACK_BOT_TOKEN || config?.slack?.bot_token || "";
-const slackSigningSecret =
-  process.env.SLACK_SIGNING_SECRET || config?.slack?.signing_secret || "";
+let configJSON;
+try {
+  configJSON = require("../config");
+  console.log("Loaded configuration from config.json");
+} catch (e) {
+  console.log("Error loading ../config.json.");
+}
 
-const slackEvents: SlackEventAdapter & EventEmitter = createEventAdapter(
-  slackSigningSecret
-) as any;
+const config = new Configuration(configJSON).validate();
 
-const discourseAPI = new DiscourseAPI();
+if (!config.isValid) {
+  console.log("Missing required configuration to run!");
+  console.log("Missing values for: ");
+  console.log(JSON.stringify(config.missingRequiredKeys, null, 2));
+  console.log(
+    "See the README for configuration schema, and make sure either env vars are set or a config.json is available"
+  );
+  process.exit(1);
+}
 
-const web = new WebClient(token);
+const slackEvents = createEventAdapter(config.slack.signingSecret);
+
+const discourseAPI = new DiscourseAPI(config.discourse);
+
+const web = new WebClient(config.slack.token);
 const userlookup = new UserNameLookupService(web);
+const postBuilder = new PostBuilder(config.slack.promoMessage);
 
 const serverPort = process.env.PORT || "3000";
 
@@ -34,12 +44,11 @@ slackEvents.on("message", (event: SlackMessageEvent) => {
   //   );
 });
 
+slackEvents.on("channel_joined", event => console.log);
+
 slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
-  const { channel } = event;
-  // Brute force
-  web.channels.join({
-    name: channel
-  });
+  const isThreadedMessage = (event: SlackMessageEvent) => !!event.thread_ts;
+  joinChannel(event.channel);
   if (!isThreadedMessage(event)) {
     return web.chat.postMessage({
       channel: event.channel,
@@ -65,21 +74,22 @@ slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
     event.thread_ts!
   );
 
-  try {
-    const url = await discourseAPI.post(title, discoursePost);
+  const res = await discourseAPI.post(title, discoursePost);
 
-    web.chat.postMessage({
+  if (res.success) {
+    return web.chat.postMessage({
       channel: event.channel,
       thread_ts: event.thread_ts,
-      text: `Gosh, this _is_ an interesting conversation - I've filed a copy at ${url} for future reference!`
-    });
-  } catch (e) {
-    web.chat.postMessage({
-      channel: event.channel,
-      thread_ts: event.thread_ts,
-      text: `Sorry! Something went wrong - please ask @Josh Wulf to take a look`
+      text: `Gosh, this _is_ an interesting conversation - I've filed a copy at ${res.url} for future reference!`
     });
   }
+  web.chat.postMessage({
+    channel: event.channel,
+    thread_ts: event.thread_ts,
+    text: `Sorry! I couldn't archive that. Discourse responded with: ${JSON.stringify(
+      res.message
+    )}`
+  });
 });
 
 async function makePostFromMessagesInThread(
@@ -95,48 +105,32 @@ async function makePostFromMessagesInThread(
     },
     "messages"
   );
-  // build a unique user set
+
+  console.log(JSON.stringify(messages)); // debug
+
+  // Remove the last message, because it is the call to the bot
+  messages.pop();
+
+  // build a set of unique user codes in the conversation
   const users = new Set<string>();
   messages.forEach(msg => users.add(msg.user));
+
+  // get a (cached) lookup dictionary of usercodes to usernames from Slack API
   const userMap = await userlookup.getUsernames(Array.from(users));
-  // replace the user code in the messages with the name
-  userMap.forEach(user =>
-    messages.forEach(message => {
-      if (message.user === user.usercode) {
-        message.user = user.username;
-      }
-    })
-  );
 
-  const threadParentMessage = messages.filter(isThreadParent)[0];
-
-  const repliesTs = threadParentMessage.replies?.map(reply => reply.ts);
-  const messageThread = [threadParentMessage];
-  console.log(repliesTs);
-  repliesTs?.forEach(replyts => {
-    const reply = messages.filter(msg => msg.ts == replyts);
-    if (reply.length === 1) {
-      messageThread.push(reply[0]);
-    }
-  });
-  return messageThread.reduce(
-    (prev, message) => `${prev}
-
-**${message.user}**: ${message.text}`,
-    ""
-  );
+  return postBuilder.buildMarkdownPost(messages, userMap);
 }
 
 // For when someone mentions the bot in a new channel
-slackEvents.on("link_shared", async (event: SlackMessageEvent) => {
-  const { channel } = event;
-  // Brute force
+slackEvents.on("link_shared", (event: SlackMessageEvent) =>
+  joinChannel(event.channel)
+);
+
+function joinChannel(channel: string) {
   web.channels.join({
     name: channel
   });
-});
-
-slackEvents.on("channel_joined", event => console.log);
+}
 
 (async () => {
   const server = await slackEvents.start(parseInt(serverPort));

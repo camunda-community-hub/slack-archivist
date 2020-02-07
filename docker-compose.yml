@@ -15,6 +15,7 @@ services:
     #   - DISCOURSE_URL=
     #   - SLACK_BOT_TOKEN=
     #   - SLACK_SIGNING_SECRET=
+    #   - SLACK_PROMO_MESSAGE= # Optional
     # Option 2: use a config.json on the local filesystem:
     # volumes:
     #   - "./config.json:/usr/src/app/config.json"
