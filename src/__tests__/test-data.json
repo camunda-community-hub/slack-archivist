@@ -1,255 +1,314 @@
 [
     {
-        "client_msg_id": "e3ccafc3-21e4-4e5e-a81b-5d0d2462030b",
+        "client_msg_id": "f8ad4b98-0dbd-4f9f-9ce2-60d36c8264c6",
         "type": "message",
-        "text": "<@UTM6C2C3H>",
-        "user": "UEVLBF0TA",
-        "ts": "1580895172.004400",
+        "text": "Hi guys,\nI see that we need to provide the starting node address and port in the config when deploying zeebe in cluster mode.  What if I do not know what would be my starting node. The way we deploy apps is you stand up a cluster which spins up nodes dynamically and we have no control over which one will come first or even the address of any node before hand. Any way to get around it?",
+        "user": "UTP31RSLE",
+        "ts": "1581019256.239300",
         "team": "T6VHNLZRR",
         "blocks": [
             {
                 "type": "rich_text",
-                "block_id": "34f5N",
+                "block_id": "ayd",
                 "elements": [
                     {
                         "type": "rich_text_section",
                         "elements": [
                             {
-                                "type": "user",
-                                "user_id": "UTM6C2C3H"
+                                "type": "text",
+                                "text": "Hi guys,\nI see that we need to provide the starting node address and port in the config when deploying zeebe in cluster mode.  What if I do not know what would be my starting node. The way we deploy apps is you stand up a cluster which spins up nodes dynamically and we have no control over which one will come first or even the address of any node before hand. Any way to get around it?"
                             }
                         ]
                     }
                 ]
             }
         ],
-        "thread_ts": "1580895172.004400",
-        "reply_count": 24,
-        "reply_users_count": 2,
-        "latest_reply": "1580973405.010200",
+        "thread_ts": "1581019256.239300",
+        "reply_count": 9,
+        "reply_users_count": 4,
+        "latest_reply": "1581036779.242000",
         "reply_users": [
-            "UEVLBF0TA",
-            "UTM6C2C3H"
+            "UJF27AU8K",
+            "UAHNVBW8N",
+            "UTP31RSLE",
+            "UEVLBF0TA"
         ],
         "replies": [
             {
-                "user": "UEVLBF0TA",
-                "ts": "1580895186.004500"
+                "user": "UJF27AU8K",
+                "ts": "1581019876.239400"
+            },
+            {
+                "user": "UJF27AU8K",
+                "ts": "1581020012.239600"
+            },
+            {
+                "user": "UJF27AU8K",
+                "ts": "1581020058.239800"
+            },
+            {
+                "user": "UAHNVBW8N",
+                "ts": "1581020435.240000"
+            },
+            {
+                "user": "UTP31RSLE",
+                "ts": "1581027605.240300"
+            },
+            {
+                "user": "UTP31RSLE",
+                "ts": "1581027619.240500"
+            },
+            {
+                "user": "UTP31RSLE",
+                "ts": "1581027639.240700"
+            },
+            {
+                "user": "UTP31RSLE",
+                "ts": "1581027673.240900"
             },
             {
                 "user": "UEVLBF0TA",
-                "ts": "1580897167.004700"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897171.004900"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897274.005100"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897279.005300"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897385.005500"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897390.005700"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897419.005900"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897422.006100"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897524.006300"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897580.006500"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897714.006700"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897738.006900"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897772.007100"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580897973.007300"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580898017.007500"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580898165.007700"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580898370.007900"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580898438.008100"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580898601.008400"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580898602.008600"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580973169.009800"
-            },
-            {
-                "user": "UTM6C2C3H",
-                "ts": "1580973170.010000"
-            },
-            {
-                "user": "UEVLBF0TA",
-                "ts": "1580973405.010200"
+                "ts": "1581036779.242000"
             }
         ],
         "subscribed": false
     },
     {
-        "client_msg_id": "703175be-7a8c-45d3-82a5-130305a0158d",
+        "client_msg_id": "fcfc31c2-db31-4f34-b2ec-84cda798a580",
         "type": "message",
-        "text": "<@UTM6C2C3H>",
-        "user": "UEVLBF0TA",
-        "ts": "1580897279.005300",
+        "text": "in K8s use a statefulset to have well-known addresses. Otherwise you probably need some static address for each broker. What platform are you using?",
+        "user": "UJF27AU8K",
+        "ts": "1581019876.239400",
         "team": "T6VHNLZRR",
         "blocks": [
             {
                 "type": "rich_text",
-                "block_id": "9ZaY",
-                "elements": [
-                    {
-                        "type": "rich_text_section",
-                        "elements": [
-                            {
-                                "type": "user",
-                                "user_id": "UTM6C2C3H"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ],
-        "thread_ts": "1580895172.004400",
-        "parent_user_id": "UEVLBF0TA"
-    },
-    {
-        "client_msg_id": "7d559a7d-2c6d-451c-8d1f-f5135b596814",
-        "type": "message",
-        "text": "shntnhsts",
-        "user": "UEVLBF0TA",
-        "ts": "1580897385.005500",
-        "team": "T6VHNLZRR",
-        "blocks": [
-            {
-                "type": "rich_text",
-                "block_id": "Pm9j1",
+                "block_id": "tsnf",
                 "elements": [
                     {
                         "type": "rich_text_section",
                         "elements": [
                             {
                                 "type": "text",
-                                "text": "shntnhsts"
+                                "text": "in K8s use a statefulset to have well-known addresses. Otherwise you probably need some static address for each broker. What platform are you using?"
                             }
                         ]
                     }
                 ]
             }
         ],
-        "thread_ts": "1580895172.004400",
-        "parent_user_id": "UEVLBF0TA"
+        "thread_ts": "1581019256.239300",
+        "parent_user_id": "UTP31RSLE"
     },
     {
-        "client_msg_id": "9c29dbd4-9024-4f6e-aee8-5cd1b984d6fd",
+        "client_msg_id": "8b5a7ae1-e316-458d-be69-e904cff5fe18",
         "type": "message",
-        "text": "<@UTM6C2C3H>",
-        "user": "UEVLBF0TA",
-        "ts": "1580897390.005700",
+        "text": "```data:\n  startup.sh: |\n    #!/usr/bin/env bash\n\n    set -eux -o pipefail\n\n    configFile=/usr/local/zeebe/conf/zeebe.cfg.toml\n\n    export ZEEBE_HOST=$(hostname -f)\n    export ZEEBE_CLUSTER_NAME=$K8S_NAMESPACE\n\n    #e.g. zeebe-0.zeebe-broker-service.customer-1-zeebe.svc.cluster.local:26502,zeebe-1.zeebe-broker-service.customer-1-zeebe.svc.cluster.local:26502,zeebe-2.zeebe-broker-service.customer-1-zeebe.svc.cluster.local:26502,\n    export ZEEBE_CONTACT_POINTS=$(for ((i=0; i&lt;${ZEEBE_CLUSTER_SIZE}; i++ )); do echo -n \"zeebe-$i.$(hostname -d):26502,\"; done)\n    # e.g. \"1\"\n    export ZEEBE_NODE_ID=$(echo $K8S_POD_NAME | tr -d \"[:alpha:]-\")\n    export ZEEBE_GATEWAY_CLUSTER_HOST=${ZEEBE_GATEWAY_CLUSTER_HOST:-${ZEEBE_HOST}}\n\n    env\n    exec /usr/local/zeebe/bin/broker```",
+        "user": "UJF27AU8K",
+        "ts": "1581020012.239600",
         "team": "T6VHNLZRR",
         "blocks": [
             {
                 "type": "rich_text",
-                "block_id": "75RG",
+                "block_id": "B1r",
                 "elements": [
                     {
-                        "type": "rich_text_section",
+                        "type": "rich_text_preformatted",
                         "elements": [
                             {
-                                "type": "user",
-                                "user_id": "UTM6C2C3H"
+                                "type": "text",
+                                "text": "data:\n  startup.sh: |\n    #!/usr/bin/env bash\n\n    set -eux -o pipefail\n\n    configFile=/usr/local/zeebe/conf/zeebe.cfg.toml\n\n    export ZEEBE_HOST=$(hostname -f)\n  export ZEEBE_CLUSTER_NAME=$K8S_NAMESPACE\n\n    #e.g. zeebe-0.zeebe-broker-service.customer-1-zeebe.svc.cluster.local:26502,zeebe-1.zeebe-broker-service.customer-1-zeebe.svc.cluster.local:26502,zeebe-2.zeebe-broker-service.customer-1-zeebe.svc.cluster.local:26502,\n    export ZEEBE_CONTACT_POINTS=$(for ((i=0; i<${ZEEBE_CLUSTER_SIZE}; i++ )); do echo -n \"zeebe-$i.$(hostname -d):26502,\"; done)\n    # e.g. \"1\"\n    export ZEEBE_NODE_ID=$(echo $K8S_POD_NAME | tr -d \"[:alpha:]-\")\n    export ZEEBE_GATEWAY_CLUSTER_HOST=${ZEEBE_GATEWAY_CLUSTER_HOST:-${ZEEBE_HOST}}\n\n    env\n    exec /usr/local/zeebe/bin/broker"
                             }
                         ]
                     }
                 ]
             }
         ],
-        "thread_ts": "1580895172.004400",
-        "parent_user_id": "UEVLBF0TA"
+        "thread_ts": "1581019256.239300",
+        "parent_user_id": "UTP31RSLE"
     },
     {
-        "client_msg_id": "d0fd9e07-09ef-4f17-aa7f-90b0a0a176dc",
+        "client_msg_id": "fa5c2990-cceb-411d-b91d-d9d147c1eb34",
         "type": "message",
-        "text": "shntsnhts",
-        "user": "UEVLBF0TA",
-        "ts": "1580897419.005900",
+        "text": "using a headless service and statefulsets to dynamically set the contact points to all nodes. not pretty but it works well.",
+        "user": "UJF27AU8K",
+        "ts": "1581020058.239800",
         "team": "T6VHNLZRR",
         "blocks": [
             {
                 "type": "rich_text",
-                "block_id": "CiJti",
+                "block_id": "BAiWD",
                 "elements": [
                     {
                         "type": "rich_text_section",
                         "elements": [
                             {
                                 "type": "text",
-                                "text": "shntsnhts"
+                                "text": "using a headless service and statefulsets to dynamically set the contact points to all nodes. not pretty but it works well."
                             }
                         ]
                     }
                 ]
             }
         ],
-        "thread_ts": "1580895172.004400",
-        "parent_user_id": "UEVLBF0TA"
+        "thread_ts": "1581019256.239300",
+        "parent_user_id": "UTP31RSLE"
     },
     {
-        "client_msg_id": "7eed96e3-d3ab-4adc-9ccb-4c4b20a78f44",
+        "client_msg_id": "890646ce-eaa7-4113-81ea-2f69a41268d4",
         "type": "message",
-        "text": "<@UTM6C2C3H>",
-        "user": "UEVLBF0TA",
-        "ts": "1580897422.006100",
+        "text": "There is an issue for us to implement DNS discovery over SRV record, so hopefully this improves in the future <https://github.com/zeebe-io/zeebe/issues/1930|https://github.com/zeebe-io/zeebe/issues/1930>",
+        "user": "UAHNVBW8N",
+        "ts": "1581020435.240000",
+        "team": "T6VHNLZRR",
+        "edited": {
+            "user": "UAHNVBW8N",
+            "ts": "1581025759.000000"
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DQz",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "There is an issue for us to implement DNS discovery over SRV record, so hopefully this improves in the future "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https://github.com/zeebe-io/zeebe/issues/1930",
+                                "text": "https://github.com/zeebe-io/zeebe/issues/1930"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "thread_ts": "1581019256.239300",
+        "parent_user_id": "UTP31RSLE"
+    },
+    {
+        "client_msg_id": "b18f17e3-e56c-456e-862e-d848e9aa9234",
+        "type": "message",
+        "text": "thanks guys...",
+        "user": "UTP31RSLE",
+        "ts": "1581027605.240300",
         "team": "T6VHNLZRR",
         "blocks": [
             {
                 "type": "rich_text",
-                "block_id": "MmR",
+                "block_id": "kmfO",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "thanks guys..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "thread_ts": "1581019256.239300",
+        "parent_user_id": "UTP31RSLE"
+    },
+    {
+        "client_msg_id": "50b2b0a5-0919-4914-91d4-e509c9b63847",
+        "type": "message",
+        "text": "btw we are using DC/OS Mesos underneath",
+        "user": "UTP31RSLE",
+        "ts": "1581027619.240500",
+        "team": "T6VHNLZRR",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "lyv6q",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "btw we are using DC/OS Mesos underneath"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "thread_ts": "1581019256.239300",
+        "parent_user_id": "UTP31RSLE"
+    },
+    {
+        "client_msg_id": "e8b3b57a-27c1-4866-a6f2-94f26a75b9be",
+        "type": "message",
+        "text": "but not directly.. There's an abstraction that we work with",
+        "user": "UTP31RSLE",
+        "ts": "1581027639.240700",
+        "team": "T6VHNLZRR",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "k/OKt",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "but not directly.. There's an abstraction that we work with"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "thread_ts": "1581019256.239300",
+        "parent_user_id": "UTP31RSLE"
+    },
+    {
+        "client_msg_id": "ec43722e-3e08-4baf-984e-362bdd38ba97",
+        "type": "message",
+        "text": "I do have a load-balancer endpoint for each cluster but not the addresses of the nodes in the cluster before-hand",
+        "user": "UTP31RSLE",
+        "ts": "1581027673.240900",
+        "team": "T6VHNLZRR",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "71w",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I do have a load-balancer endpoint for each cluster but not the addresses of the nodes in the cluster before-hand"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "thread_ts": "1581019256.239300",
+        "parent_user_id": "UTP31RSLE"
+    },
+    {
+        "client_msg_id": "63ccf365-8aa4-4905-8646-62f968b23fe7",
+        "type": "message",
+        "text": "<@UTM6C2C3H> How do I get the broker node addresses on Kubernetes (K8s) for cluster config?",
+        "user": "UEVLBF0TA",
+        "ts": "1581036779.242000",
+        "team": "T6VHNLZRR",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "TYi+",
                 "elements": [
                     {
                         "type": "rich_text_section",
@@ -257,249 +316,17 @@
                             {
                                 "type": "user",
                                 "user_id": "UTM6C2C3H"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ],
-        "thread_ts": "1580895172.004400",
-        "parent_user_id": "UEVLBF0TA"
-    },
-    {
-        "client_msg_id": "376b2af4-14fc-42ac-8b2e-126f26711af3",
-        "type": "message",
-        "text": "<@UTM6C2C3H>",
-        "user": "UEVLBF0TA",
-        "ts": "1580897524.006300",
-        "team": "T6VHNLZRR",
-        "blocks": [
-            {
-                "type": "rich_text",
-                "block_id": "Tth",
-                "elements": [
-                    {
-                        "type": "rich_text_section",
-                        "elements": [
+                            },
                             {
-                                "type": "user",
-                                "user_id": "UTM6C2C3H"
+                                "type": "text",
+                                "text": " How do I get the broker node addresses on Kubernetes (K8s) for cluster config?"
                             }
                         ]
                     }
                 ]
             }
         ],
-        "thread_ts": "1580895172.004400",
-        "parent_user_id": "UEVLBF0TA"
-    },
-    {
-        "client_msg_id": "339a7d84-a204-4c71-948b-678e708f1125",
-        "type": "message",
-        "text": "<@UTM6C2C3H>",
-        "user": "0"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897167.004700"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897171.004900"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897274.005100"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897279.005300"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897385.005500"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897390.005700"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897419.005900"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897422.006100"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897524.006300"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897580.006500"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897714.006700"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897738.006900"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897772.007100"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580897973.007300"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580898017.007500"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580898165.007700"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580898370.007900"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580898438.008100"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580898601.008400"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580898602.008600"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580973169.009800"
-    },
-    {
-        "user": "UTM6C2C3H",
-        "ts": "1580973170.010000"
-    },
-    {
-        "user": "UEVLBF0TA",
-        "ts": "1580973405.010200"
+        "thread_ts": "1581019256.239300",
+        "parent_user_id": "UTP31RSLE"
     }
-],
-"subscribed": false
-},
-{
-"client_msg_id": "b875e846-2ce9-49ba-b796-784745cfac38",
-"type": "message",
-"text": "<@UTM6C2C3H>",
-"user": "UEVLBF0TA",
-"ts": "1580895186.004500",
-"team": "T6VHNLZRR",
-"blocks": [
-    {
-        "type": "rich_text",
-        "block_id": "yib=z",
-        "elements": [
-            {
-                "type": "rich_text_section",
-                "elements": [
-                    {
-                        "type": "user",
-                        "user_id": "UTM6C2C3H"
-                    }
-                ]
-            }
-        ]
-    }
-],
-"thread_ts": "1580895172.004400",
-"parent_user_id": "UEVLBF0TA"
-},
-{
-"client_msg_id": "7359a9ad-1662-4983-848f-f08c7f37f598",
-"type": "message",
-"text": "this is a thread",
-"user": "UEVLBF0TA",
-"ts": "1580897167.004700",
-"team": "T6VHNLZRR",
-"blocks": [
-    {
-        "type": "rich_text",
-        "block_id": "saVCR",
-        "elements": [
-            {
-                "type": "rich_text_section",
-                "elements": [
-                    {
-                        "type": "text",
-                        "text": "this is a thread"
-                    }
-                ]
-            }
-        ]
-    }
-],
-"thread_ts": "1580895172.004400",
-"parent_user_id": "UEVLBF0TA"
-},
-{
-"client_msg_id": "a1990889-c740-4bc0-8af0-c62641de7260",
-"type": "message",
-"text": "<@UTM6C2C3H>",
-"user": "UEVLBF0TA",
-"ts": "1580897171.004900",
-"team": "T6VHNLZRR",
-"blocks": [
-    {
-        "type": "rich_text",
-        "block_id": "NBiu+",
-        "elements": [
-            {
-                "type": "rich_text_section",
-                "elements": [
-                    {
-                        "type": "user",
-                        "user_id": "UTM6C2C3H"
-                    }
-                ]
-            }
-        ]
-    }
-],
-"thread_ts": "1580895172.004400",
-"parent_user_id": "UEVLBF0TA"
-},
-{
-"client_msg_id": "efac0515-d881-4bf1-b3da-ee20fec9652c",
-"type": "message",
-"text": "Another One!",
-"user": "UEVLBF0TA",
-"ts": "1580897274.005100",
-"team": "T6VHNLZRR",
-"blocks": [
-    {
-        "type": "rich_text",
-        "block_id": "H1G",
-        "elements": [
-            {
-                "type": "rich_text_section",
-                "elements": [
-                    {
-                        "type": "text",
-                        "text": "Another One!"
-                    }
-                ]
-            }
-        ]
-    }
-],
-"thread_ts": "1580895172.004400",
-"parent_user_id": "UEVLBF0TA"
-}
 ]
