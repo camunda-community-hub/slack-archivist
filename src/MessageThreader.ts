@@ -38,8 +38,15 @@ export function replaceUsercodesWithNames(
     }))
     .map(message => ({
       ...message,
-      text: replaceUsercodesInText(message.text, userMap)
+      text: addReturnForImmediateCodeSamples(
+        replaceUsercodesInText(message.text, userMap)
+      )
     }));
+}
+
+// A code sample block that starts at the beginning of a message needs a leading CR
+function addReturnForImmediateCodeSamples(text: string) {
+  return text.startsWith("```") ? `\n${text}` : text;
 }
 
 function getUsernameFromCode(usercode: string, userMap: UserDictionary[]) {
