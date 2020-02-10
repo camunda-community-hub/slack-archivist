@@ -26,6 +26,7 @@
     "@slack/web-api": "^5.7.0",
     "@types/node": "12.7.0",
     "axios": "^0.19.2",
+    "husky": "^4.2.1",
     "typescript": "^3.7.5"
   },
   "devDependencies": {

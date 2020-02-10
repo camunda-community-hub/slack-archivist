@@ -3,11 +3,12 @@ import { existsSync, readFileSync, writeFileSync } from "fs";
 import { getAll } from "./webapi-pagination";
 
 const CACHEFILE = "./user-cache.json";
+export type UserCache = { [usercode: string]: string };
 
 // Caches the user list for 24 hours for performance and to avoid rate-limiting
 export class UserNameLookupService {
   web: WebClient;
-  userCache: { [usercode: string]: string };
+  userCache: UserCache;
   ready: Promise<void>;
   constructor(web: WebClient) {
     this.web = web;
@@ -37,6 +38,11 @@ export class UserNameLookupService {
       usercode,
       username: this.userCache[usercode]
     }));
+  }
+
+  async getUsernameDictionary() {
+    await this.ready;
+    return this.userCache;
   }
 
   private async fetchAndCacheUserList() {
