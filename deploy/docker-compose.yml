@@ -3,6 +3,7 @@ version: "2"
 services:
   archivist:
     image: sitapati/slack-archivist:latest
+    restart: always
     container_name: slack-archivist
     environment:
       - VIRTUAL_PORT=3000
