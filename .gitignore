@@ -3,3 +3,4 @@ node_modules
 dist
 config.json
 user-cache.json
+.DS_Store

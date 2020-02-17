@@ -1,0 +1,19 @@
+version: "2"
+
+services:
+  archivist:
+    image: sitapati/slack-archivist:latest
+    container_name: slack-archivist
+    environment:
+      - VIRTUAL_PORT=3000
+      - VIRTUAL_HOST=slack-archivist.joshwulf.com
+      - LETSENCRYPT_HOST=slack-archivist.joshwulf.com
+      - LETSENCRYPT_EMAIL=josh@magikcraft.io
+    volumes:
+      - "./config.json:/usr/src/app/config.json"
+  # This is the network for the nginx proxy
+  # See https://github.com/jwulf/letsencrypt-nginx-sidecar
+networks:
+  default:
+    external:
+      name: letsencrypt
