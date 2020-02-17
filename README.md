@@ -48,6 +48,10 @@ The bot will need the following scopes in its OAuth settings:
 * users:read
 * users:write
 
+You will need to set up the Event Subscriptions for the bot, like this:
+
+![](img/event-subscriptions.png)
+
 ## Running from Docker
 
 Read the `docker-compose.yml` file and set up either the environment variables or a `config.json`. Then run:
@@ -55,6 +59,8 @@ Read the `docker-compose.yml` file and set up either the environment variables o
 ```
 docker-compose up -d
 ```
+
+If you want to run this using https, you can do it easily using the [Nginx / LetsEncrypt Docker sidecar](https://github.com/jwulf/letsencrypt-nginx-sidecar).
 
 ## Installation from source
 
