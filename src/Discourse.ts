@@ -2,7 +2,7 @@
 // https://meta.discourse.org/t/how-to-reverse-engineer-the-discourse-api/20576
 // https://meta.discourse.org/t/how-to-turn-off-a-checker-for-title-seems-unclear-is-it-a-complete-sentence/55070/12
 import Axios from "axios";
-import { DiscourseConfigObject } from "./Configuration";
+import { DiscourseConfigObject } from "./lib/Configuration";
 
 export class DiscourseAPI {
   private http: any;
@@ -19,8 +19,8 @@ export class DiscourseAPI {
         "Api-Key": config.token,
         "Api-Username": config.user,
         "Content-Type": "application/json",
-        Accept: "application/json"
-      }
+        Accept: "application/json",
+      },
     });
   }
 
@@ -41,16 +41,16 @@ export class DiscourseAPI {
       const { data } = await this.http.post("/posts.json", {
         title,
         raw: discoursePost,
-        category: this.config.category
+        category: this.config.category,
       });
       return {
         success: true,
-        url: `${this.config.url}t/${data.topic_slug}/${data.topic_id}`
+        url: `${this.config.url}t/${data.topic_slug}/${data.topic_id}`,
       };
     } catch (e) {
       return {
         success: false,
-        message: e?.response?.data?.errors || e.message
+        message: e?.response?.data?.errors || e.message,
       };
     }
   }

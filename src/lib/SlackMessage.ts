@@ -9,7 +9,7 @@ export interface SlackMessageEvent {
   blocks: [{ type: string; block_id: string; elements: SlackMessageElement[] }];
   channel: string;
   event_ts: string;
-  channel_type: string;
+  channel_type?: string;
   thread_ts?: string;
   edited?: {
     user: string;

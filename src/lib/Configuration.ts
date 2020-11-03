@@ -21,7 +21,7 @@ interface SlackConfigObject {
   promoMessage?: string;
 }
 
-class SlackConfig {
+class SlackConfig implements SlackConfigObject {
   token!: string;
   signingSecret!: string;
   promoMessage?: string;
@@ -30,7 +30,7 @@ class SlackConfig {
   }
 }
 
-class Configuration {
+export class Configuration {
   discourse: DiscourseConfig = {} as DiscourseConfig;
   slack: SlackConfig = {} as SlackConfig;
   isValid: boolean | undefined;
@@ -97,24 +97,4 @@ class Configuration {
     const nullKeys = Object.keys(config).filter((key) => config[key] === null);
     return nullKeys.length > 0 ? nullKeys : undefined;
   }
-}
-
-let configJSON;
-try {
-  configJSON = require("../config");
-  console.log("Loaded configuration from config.json");
-} catch (e) {
-  console.log("Error loading ../config.json.");
-}
-
-export const configuration = new Configuration(configJSON).validate();
-
-if (!configuration.isValid) {
-  console.log("Missing required configuration to run!");
-  console.log("Missing values for: ");
-  console.log(JSON.stringify(configuration.missingRequiredKeys, null, 2));
-  console.log(
-    "See the README for configuration schema, and make sure either env vars are set or a config.json is available"
-  );
-  process.exit(1);
 }

@@ -5,7 +5,7 @@ import { testPostOutput } from "../src/test-data/test-post-output";
 
 describe("PostBuilder", () => {
   const postBuilder = new PostBuilder({
-    userMap
+    userMap,
   });
 
   it("correctly builds a markdown post", () => {

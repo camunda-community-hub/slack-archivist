@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "test": "jest"
+    "test": "jest",
+    "clean": "rm -rf dist"
   },
   "repository": {
     "type": "git",

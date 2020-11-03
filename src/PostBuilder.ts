@@ -1,4 +1,4 @@
-import { SlackMessageEvent } from "./types/SlackMessage";
+import { SlackMessageEvent } from "./lib/SlackMessage";
 import { UserCache } from "./UserNameLookupService";
 
 interface ParsedMessage {

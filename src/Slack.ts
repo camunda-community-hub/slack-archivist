@@ -1,4 +1,4 @@
-import { configuration } from "./Configuration";
+import { configuration } from "./config";
 import { createEventAdapter } from "@slack/events-api";
 import { WebClient } from "@slack/web-api";
 

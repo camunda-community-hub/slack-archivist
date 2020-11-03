@@ -1,12 +1,14 @@
 import { AddressInfo } from "net";
-import { SlackMessageEvent } from "./types/SlackMessage";
+import { SlackMessageEvent } from "./lib/SlackMessage";
 import { getAll } from "./webapi-pagination";
 import { UserNameLookupService } from "./UserNameLookupService";
 import { DiscourseAPI } from "./Discourse";
-import { configuration } from "./Configuration";
+import { configuration } from "./config";
 import { PostBuilder } from "./PostBuilder";
 import { greetNewUser } from "./NewUser";
 import { slackEvents, web } from "./Slack";
+import { isCommand, parseCommand } from "./lib/utils";
+import { executeCommand } from "./Command";
 
 const discourseAPI = new DiscourseAPI(configuration.discourse);
 
@@ -32,36 +34,37 @@ async function main() {
   slackEvents.on("team_join", greetNewUser);
 
   slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
-    // @DEBUG
-    console.log(event);
-    if (event.text?.includes("DM")) {
-      web.chat.postMessage({
-        channel: event.user,
-        as_user: true,
-        text: "DM from Slack Archivist",
-      });
-      return;
-    }
-    // @DEBUG
     const isThreadedMessage = (event: SlackMessageEvent) => !!event.thread_ts;
     joinChannel(event.channel);
-    if (!isThreadedMessage(event)) {
-      return web.chat.postMessage({
-        channel: event.channel,
-        thread_ts: event.thread_ts,
-        text:
-          "Tag me _in a thread_ with what you want as the post title, and I'll put the thread in the Forum for you.",
+    const msg = event.text;
+
+    if (isCommand(msg)) {
+      const command = parseCommand(msg);
+      return executeCommand({
+        command,
+        event,
       });
     }
 
-    const title = event.text.substr(12, event.text.length); // Remove the bot's name
-    if (title.length < 1) {
-      console.log("Threaded message - but no title!");
-      return web.chat.postMessage({
+    if (!isThreadedMessage(event)) {
+      return web.chat.postEphemeral({
+        user: event.user,
         channel: event.channel,
         thread_ts: event.thread_ts,
         text:
-          "Tag me with what you want as the post title, and I'll put this thread in the Forum for you.",
+          "Tag me _in a threaded reply_ with what you want as the post title, and I'll put the thread in the Forum for you. If there are no replies, you can reply to the OP (your reply makes a thread) and tag me in that reply.",
+      });
+    }
+
+    const title = msg;
+    if (title.length < 1) {
+      console.log("Threaded message - but no title!");
+      return web.chat.postEphemeral({
+        user: event.user,
+        channel: event.channel,
+        thread_ts: event.thread_ts,
+        text:
+          "Tag me with what you want as the post title, and I'll put this thread in the Forum for you.\n\nFor example:\n\n@archivist How do I collect the output of a multi-instance sub-process?",
       });
     }
     console.log("Threaded message - Creating Discourse Post");
