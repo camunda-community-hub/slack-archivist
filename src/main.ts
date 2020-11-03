@@ -7,7 +7,7 @@ import { configuration } from "./config";
 import { PostBuilder } from "./PostBuilder";
 import { greetNewUser } from "./NewUser";
 import { slackEvents, web } from "./Slack";
-import { isCommand, parseCommand } from "./lib/utils";
+import { isCommand, parseCommand, removeUsernameTag } from "./lib/utils";
 import { executeCommand } from "./Command";
 
 const discourseAPI = new DiscourseAPI(configuration.discourse);
@@ -36,7 +36,7 @@ async function main() {
   slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
     const isThreadedMessage = (event: SlackMessageEvent) => !!event.thread_ts;
     joinChannel(event.channel);
-    const msg = event.text;
+    const msg = removeUsernameTag(event.text);
 
     if (isCommand(msg)) {
       const command = parseCommand(msg);
