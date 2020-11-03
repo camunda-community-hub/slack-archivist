@@ -11,7 +11,7 @@ class DiscourseConfig {
   user!: string;
   url!: string;
   constructor(config: DiscourseConfigObject) {
-    Object.keys(config).forEach(key => (this[key] = config[key]));
+    Object.keys(config).forEach((key) => (this[key] = config[key]));
   }
 }
 
@@ -26,11 +26,11 @@ class SlackConfig {
   signingSecret!: string;
   promoMessage?: string;
   constructor(config: SlackConfigObject) {
-    Object.keys(config).forEach(key => (this[key] = config[key]));
+    Object.keys(config).forEach((key) => (this[key] = config[key]));
   }
 }
 
-export class Configuration {
+class Configuration {
   discourse: DiscourseConfig = {} as DiscourseConfig;
   slack: SlackConfig = {} as SlackConfig;
   isValid: boolean | undefined;
@@ -81,7 +81,7 @@ export class Configuration {
   validate(): Configuration {
     const missingRequiredKeys = {
       discourse: this.getNullKeys(this.discourse),
-      slack: this.getNullKeys(this.slack)
+      slack: this.getNullKeys(this.slack),
     };
     for (const key in missingRequiredKeys) {
       if (!missingRequiredKeys[key]) {
@@ -94,7 +94,27 @@ export class Configuration {
   }
 
   private getNullKeys(config: object) {
-    const nullKeys = Object.keys(config).filter(key => config[key] === null);
+    const nullKeys = Object.keys(config).filter((key) => config[key] === null);
     return nullKeys.length > 0 ? nullKeys : undefined;
   }
+}
+
+let configJSON;
+try {
+  configJSON = require("../config");
+  console.log("Loaded configuration from config.json");
+} catch (e) {
+  console.log("Error loading ../config.json.");
+}
+
+export const configuration = new Configuration(configJSON).validate();
+
+if (!configuration.isValid) {
+  console.log("Missing required configuration to run!");
+  console.log("Missing values for: ");
+  console.log(JSON.stringify(configuration.missingRequiredKeys, null, 2));
+  console.log(
+    "See the README for configuration schema, and make sure either env vars are set or a config.json is available"
+  );
+  process.exit(1);
 }

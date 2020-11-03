@@ -23,15 +23,16 @@
   "homepage": "https://github.com/jwulf/slack-archivist#readme",
   "dependencies": {
     "@slack/events-api": "^2.3.1",
+    "@slack/interactive-messages": "^1.7.0",
     "@slack/web-api": "^5.7.0",
-    "@types/node": "12.7.0",
-    "axios": "^0.19.2",
-    "husky": "^4.2.1",
-    "typescript": "^3.7.5"
+    "axios": "^0.19.2"
   },
   "devDependencies": {
     "@types/jest": "^25.1.2",
+    "@types/node": "12.7.0",
     "jest": "^25.1.0",
-    "ts-jest": "^25.2.0"
+    "steno": "^0.5.0",
+    "ts-jest": "^25.2.0",
+    "typescript": "^3.7.5"
   }
 }

@@ -1,44 +1,21 @@
-import { createEventAdapter } from "@slack/events-api";
-import { WebClient } from "@slack/web-api";
 import { AddressInfo } from "net";
-import { SlackMessageEvent } from "./SlackMessage";
+import { SlackMessageEvent } from "./types/SlackMessage";
 import { getAll } from "./webapi-pagination";
 import { UserNameLookupService } from "./UserNameLookupService";
 import { DiscourseAPI } from "./Discourse";
-import { Configuration } from "./Configuration";
+import { configuration } from "./Configuration";
 import { PostBuilder } from "./PostBuilder";
+import { greetNewUser } from "./NewUser";
+import { slackEvents, web } from "./Slack";
 
-let configJSON;
-try {
-  configJSON = require("../config");
-  console.log("Loaded configuration from config.json");
-} catch (e) {
-  console.log("Error loading ../config.json.");
-}
+const discourseAPI = new DiscourseAPI(configuration.discourse);
 
-const config = new Configuration(configJSON).validate();
-
-if (!config.isValid) {
-  console.log("Missing required configuration to run!");
-  console.log("Missing values for: ");
-  console.log(JSON.stringify(config.missingRequiredKeys, null, 2));
-  console.log(
-    "See the README for configuration schema, and make sure either env vars are set or a config.json is available"
-  );
-  process.exit(1);
-}
-
-const slackEvents = createEventAdapter(config.slack.signingSecret);
-
-const discourseAPI = new DiscourseAPI(config.discourse);
-
-const web = new WebClient(config.slack.token);
 const userlookup = new UserNameLookupService(web);
 
 async function main() {
   const postBuilder = new PostBuilder({
-    slackPromoMessage: config.slack.promoMessage,
-    userMap: await userlookup.getUsernameDictionary()
+    slackPromoMessage: configuration.slack.promoMessage,
+    userMap: await userlookup.getUsernameDictionary(),
   });
 
   const serverPort = process.env.PORT || "3000";
@@ -49,9 +26,23 @@ async function main() {
     //   );
   });
 
-  slackEvents.on("channel_joined", event => console.log);
+  slackEvents.on("channel_joined", (event) => console.log);
+
+  // Greet new users
+  slackEvents.on("team_join", greetNewUser);
 
   slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
+    // @DEBUG
+    console.log(event);
+    if (event.text?.includes("DM")) {
+      web.chat.postMessage({
+        channel: event.user,
+        as_user: true,
+        text: "DM from Slack Archivist",
+      });
+      return;
+    }
+    // @DEBUG
     const isThreadedMessage = (event: SlackMessageEvent) => !!event.thread_ts;
     joinChannel(event.channel);
     if (!isThreadedMessage(event)) {
@@ -59,7 +50,7 @@ async function main() {
         channel: event.channel,
         thread_ts: event.thread_ts,
         text:
-          "Tag me _in a thread_ with what you want as the post title, and I'll put the thread in the Forum for you."
+          "Tag me _in a thread_ with what you want as the post title, and I'll put the thread in the Forum for you.",
       });
     }
 
@@ -70,7 +61,7 @@ async function main() {
         channel: event.channel,
         thread_ts: event.thread_ts,
         text:
-          "Tag me with what you want as the post title, and I'll put this thread in the Forum for you."
+          "Tag me with what you want as the post title, and I'll put this thread in the Forum for you.",
       });
     }
     console.log("Threaded message - Creating Discourse Post");
@@ -85,7 +76,7 @@ async function main() {
       return web.chat.postMessage({
         channel: event.channel,
         thread_ts: event.thread_ts,
-        text: `Gosh, this _is_ an interesting conversation - I've filed a copy at ${res.url} for future reference!`
+        text: `Gosh, this _is_ an interesting conversation - I've filed a copy at ${res.url} for future reference!`,
       });
     }
     web.chat.postMessage({
@@ -93,7 +84,7 @@ async function main() {
       thread_ts: event.thread_ts,
       text: `Sorry! I couldn't archive that. Discourse responded with: ${JSON.stringify(
         res.message
-      )}`
+      )}`,
     });
   });
 
@@ -106,7 +97,7 @@ async function main() {
       web.conversations.replies,
       {
         channel,
-        ts: threadParent
+        ts: threadParent,
       },
       "messages"
     );
@@ -126,7 +117,7 @@ async function main() {
 
   function joinChannel(channel: string) {
     web.channels.join({
-      name: channel
+      name: channel,
     });
   }
 

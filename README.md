@@ -121,6 +121,8 @@ npm run build
 npm run start
 ```
 
+You can also deploy the bot using docker, following the instructions and template in the `deploy` directory.
+
 ## Bot Behaviour
 
 The bot behaviour is described in the [Behaviour.bpmn](Behaviour.bpmn) file.
@@ -134,3 +136,7 @@ I livestreamed a lot of the coding:
 * [Building a Slack bot - Slack Archivist for the Zeebe Community: Part 1 of 2](https://youtu.be/v5CkZb-xlBc)
 
 * [Building a Slack bot - Slack Archivist for the Zeebe Community: Part 2 of 2](https://youtu.be/n3zDiqRgW0o)
+
+## Resources
+
+* [Slack event JSON Schema](https://github.com/slackapi/slack-api-specs/blob/master/events-api/slack_common_event_wrapper_schema.json)

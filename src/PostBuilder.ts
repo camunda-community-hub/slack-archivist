@@ -1,4 +1,4 @@
-import { SlackMessageEvent } from "./SlackMessage";
+import { SlackMessageEvent } from "./types/SlackMessage";
 import { UserCache } from "./UserNameLookupService";
 
 interface ParsedMessage {
@@ -12,7 +12,7 @@ export class PostBuilder {
 
   constructor({
     userMap,
-    slackPromoMessage
+    slackPromoMessage,
   }: {
     slackPromoMessage?: string;
     userMap: UserCache;
@@ -22,14 +22,14 @@ export class PostBuilder {
   }
 
   buildMarkdownPost(messages: SlackMessageEvent[]) {
-    const optionallyAddSlackPromo = messages =>
+    const optionallyAddSlackPromo = (messages) =>
       this.slackPromoMessage
         ? [
             ...messages,
             {
               user: "Note",
-              text: this.slackPromoMessage
-            }
+              text: this.slackPromoMessage,
+            },
           ]
         : messages;
 
@@ -51,10 +51,10 @@ export class PostBuilder {
 
     // Reorder the message according to the threading metadata. They are not ordered in the array.
     const orderedRepliesIndex =
-      threadParentMessage.replies?.map(reply => reply.ts) || []; // Allows a single post to be archived by calling the bot in the first thread message
+      threadParentMessage.replies?.map((reply) => reply.ts) || []; // Allows a single post to be archived by calling the bot in the first thread message
     const messageThread = [threadParentMessage];
-    orderedRepliesIndex.forEach(replyts => {
-      const reply = messages.filter(msg => msg.ts == replyts);
+    orderedRepliesIndex.forEach((replyts) => {
+      const reply = messages.filter((msg) => msg.ts == replyts);
       if (reply.length === 1) {
         messageThread.push(reply[0]);
       }
@@ -66,12 +66,12 @@ export class PostBuilder {
     messageThread: SlackMessageEvent[]
   ): ParsedMessage[] {
     // replace the user code in the messages with the name, and return just text and username
-    return messageThread.map(message => ({
+    return messageThread.map((message) => ({
       ...message,
       user: this.userMap[message.user] ?? message.user,
       text: this._addReturnForBackTicks(
         this.replaceUsercodesInText(message.text)
-      )
+      ),
     }));
   }
 
