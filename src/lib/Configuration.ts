@@ -27,7 +27,7 @@ export async function getConfiguration() {
   });
 
   const slack = await tPromise.decode(SlackConfig)({
-    token: process.env.SLACK_BOT_TOKEN,
+    token: process.env.SLACK_TOKEN,
     signingSecret: process.env.SLACK_SIGNING_SECRET,
     promoMessage: process.env.SLACK_PROMO_MESSAGE,
     botname: process.env.SLACK_BOTNAME,
