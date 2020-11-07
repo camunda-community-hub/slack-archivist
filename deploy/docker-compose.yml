@@ -11,7 +11,7 @@ services:
       - LETSENCRYPT_HOST=slack-archivist.joshwulf.com
       - LETSENCRYPT_EMAIL=josh@magikcraft.io
     volumes:
-      - "../.env:/usr/src/app/"
+      - "${PWD}/../.env:/usr/src/app/.env"
   # This is the network for the nginx proxy
   # See https://github.com/jwulf/letsencrypt-nginx-sidecar
 networks:
