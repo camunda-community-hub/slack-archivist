@@ -9,20 +9,21 @@ export type UserCache = { [usercode: string]: Username };
 
 // Caches the user list for 24 hours for performance and to avoid rate-limiting
 export class UserNameLookupService {
-  web: WebClient;
+  slackWeb: WebClient;
   userCache: UserCache;
   ready: Promise<void>;
-  slack: SlackConfigObject;
-  constructor(web: WebClient, slack: SlackConfigObject) {
-    this.web = web;
+  botname: string;
+  constructor(slackWeb: WebClient, slackConfig: SlackConfigObject) {
+    this.slackWeb = slackWeb;
     this.userCache = {};
-    this.slack = slack;
+    this.botname = slackConfig.botname;
     if (existsSync(CACHEFILE)) {
       try {
         this.userCache = JSON.parse(readFileSync(CACHEFILE, "utf8"));
         console.log(
           `Read ${Object.keys(this.userCache).length} users from disk cache...`
         );
+        this.getBotUserId().then((id) => console.log("botuser id", id));
         this.ready = Promise.resolve();
       } catch (e) {
         console.log(e);
@@ -53,7 +54,7 @@ export class UserNameLookupService {
   async getBotUserId() {
     await this.ready;
     const userId = Object.keys(this.userCache).filter(
-      (usercode) => this.userCache[usercode] === this.slack.botname
+      (usercode) => this.userCache[usercode] === this.botname
     );
     return userId[0];
   }
@@ -61,7 +62,7 @@ export class UserNameLookupService {
   private async fetchAndCacheUserList() {
     // https://api.slack.com/methods/users.list
     console.log("Fetching user list from Slack...");
-    const users = await getAll(this.web.users.list, {}, "members");
+    const users = await getAll(this.slackWeb.users.list, {}, "members");
     users.forEach(
       (user) =>
         (this.userCache[user.id] = user.profile?.display_name || user.name)
@@ -74,5 +75,6 @@ export class UserNameLookupService {
       console.log(e);
       console.log("This was an error writing the user cache to disk");
     }
+    this.getBotUserId().then((id) => console.log("botuser id", id));
   }
 }

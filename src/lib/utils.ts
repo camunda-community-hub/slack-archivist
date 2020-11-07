@@ -1,5 +1,5 @@
 export function removeBotnameTag(msg: string, botname: string) {
-  const botnameTag = `<${botname}>`;
+  const botnameTag = `<@${botname}>`;
   return msg.includes(botnameTag) ? msg.replace(botnameTag, "") : msg;
 }
 
