@@ -35,7 +35,7 @@ export class DiscourseAPI {
         raw: discoursePost,
         category: this.config.category,
       })
-      .then((data) =>
+      .then(({ data }) =>
         E.right(`${this.config.url}t/${data.topic_slug}/${data.topic_id}`)
       )
       .catch((e) => E.left(new Error(e?.response?.data?.errors || e.message)));

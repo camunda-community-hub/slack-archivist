@@ -86,7 +86,7 @@ async function main() {
 
     // tslint:disable-next-line: no-console
     console.log("Title", title);
-    console.log("Post", discourseAPI); // @DEBUG
+    console.log("Post", discoursePost); // @DEBUG
 
     const res = await discourseAPI.post(title, discoursePost);
     const discoursePostFailed = (e: Error) =>
