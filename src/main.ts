@@ -12,6 +12,8 @@ import { promoText } from "./messages/promo";
 import { fold } from "fp-ts/lib/Either";
 import { helpText } from "./messages/help";
 
+require("dotenv").config();
+
 async function main() {
   const configuration = await getConfiguration();
   const discourseAPI = new DiscourseAPI(configuration.discourse);

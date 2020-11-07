@@ -1,8 +1,6 @@
 import * as t from "io-ts";
 import * as tPromise from "io-ts-promise";
 
-require("dotenv").config();
-
 const DiscourseConfig = t.type({
   category: t.string,
   token: t.string,
