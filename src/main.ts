@@ -24,6 +24,7 @@ console.log(filepath);
 console.log(fs.readdirSync(process.cwd(), { withFileTypes: true }));
 console.log(fs.readFileSync(filepath, "utf-8"));
 
+console.log(process.env);
 // @DEBUG:end
 
 async function main() {
