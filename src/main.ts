@@ -5,12 +5,12 @@ import { UserNameLookupService } from "./UserNameLookupService";
 import { DiscourseAPI } from "./Discourse";
 import { getConfiguration } from "./lib/Configuration";
 import { PostBuilder } from "./PostBuilder";
-import { greetNewUser } from "./NewUser";
 import { getSlack } from "./Slack";
 import { isCommand, parseCommand, removeBotnameTag } from "./lib/utils";
 import { executeCommand } from "./Command";
 import { promoText } from "./messages/promo";
 import { fold } from "fp-ts/lib/Either";
+import { helpText } from "./messages/help";
 
 async function main() {
   const configuration = await getConfiguration();
@@ -31,7 +31,14 @@ async function main() {
   slackEvents.on("channel_joined", (event) => console.log);
 
   // Greet new users
-  slackEvents.on("team_join", greetNewUser);
+  slackEvents.on("team_join", (event) => {
+    const { user } = event;
+    slackWeb.chat.postMessage({
+      channel: user,
+      as_user: true,
+      text: helpText,
+    });
+  });
 
   slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
     const isThreadedMessage = (event: SlackMessageEvent) => !!event.thread_ts;
