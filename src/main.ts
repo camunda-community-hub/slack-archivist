@@ -90,7 +90,8 @@ async function main() {
 
     const res = await discourseAPI.post(title, discoursePost);
     const discoursePostFailed = (e: Error) =>
-      slackWeb.chat.postMessage({
+      slackWeb.chat.postEphemeral({
+        user: event.user,
         channel: event.channel,
         thread_ts: event.thread_ts,
         text: `Sorry! I couldn't archive that. Discourse responded with: ${JSON.stringify(
