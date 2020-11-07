@@ -13,7 +13,8 @@ export function executeCommand({
 }) {
   switch (command) {
     case "help": {
-      return slackWeb.chat.postMessage({
+      return slackWeb.chat.postEphemeral({
+        user: event.user,
         channel: event.channel,
         thread_ts: event.thread_ts,
         text: helpText,
