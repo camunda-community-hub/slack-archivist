@@ -121,7 +121,7 @@ async function main() {
       "messages"
     );
 
-    console.log(JSON.stringify(messages)); // debug
+    // console.log(JSON.stringify(messages, null, 2)); // debug
 
     // Remove the last message, because it is the call to the bot
     messages.pop();
