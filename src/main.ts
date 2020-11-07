@@ -3,24 +3,24 @@ import { SlackMessageEvent } from "./lib/SlackMessage";
 import { getAll } from "./webapi-pagination";
 import { UserNameLookupService } from "./UserNameLookupService";
 import { DiscourseAPI } from "./Discourse";
-import { configuration } from "./config";
+import { getConfiguration } from "./lib/Configuration";
 import { PostBuilder } from "./PostBuilder";
 import { greetNewUser } from "./NewUser";
-import { slackEvents, web } from "./Slack";
-import { isCommand, parseCommand, removeUsernameTag } from "./lib/utils";
+import { getSlack } from "./Slack";
+import { isCommand, parseCommand, removeBotnameTag } from "./lib/utils";
 import { executeCommand } from "./Command";
-
-const discourseAPI = new DiscourseAPI(configuration.discourse);
-
-const userlookup = new UserNameLookupService(web);
+import { promoText } from "./messages/promo";
+import { fold } from "fp-ts/lib/Either";
 
 async function main() {
+  const configuration = await getConfiguration();
+  const discourseAPI = new DiscourseAPI(configuration.discourse);
+  const { slackEvents, slackWeb } = await getSlack(configuration.slack);
+  const userlookup = new UserNameLookupService(slackWeb, configuration.slack);
   const postBuilder = new PostBuilder({
-    slackPromoMessage: configuration.slack.promoMessage,
+    slackPromoMessage: promoText,
     userMap: await userlookup.getUsernameDictionary(),
   });
-
-  const serverPort = process.env.PORT || "3000";
 
   slackEvents.on("message", (event: SlackMessageEvent) => {
     //   console.log(
@@ -36,18 +36,19 @@ async function main() {
   slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
     const isThreadedMessage = (event: SlackMessageEvent) => !!event.thread_ts;
     joinChannel(event.channel);
-    const msg = removeUsernameTag(event.text);
+    const msg = removeBotnameTag(event.text, await userlookup.getBotUserId());
 
     if (isCommand(msg)) {
       const command = parseCommand(msg);
       return executeCommand({
         command,
         event,
+        slackWeb,
       });
     }
 
     if (!isThreadedMessage(event)) {
-      return web.chat.postEphemeral({
+      return slackWeb.chat.postEphemeral({
         user: event.user,
         channel: event.channel,
         thread_ts: event.thread_ts,
@@ -59,7 +60,7 @@ async function main() {
     const title = msg;
     if (title.length < 1) {
       console.log("Threaded message - but no title!");
-      return web.chat.postEphemeral({
+      return slackWeb.chat.postEphemeral({
         user: event.user,
         channel: event.channel,
         thread_ts: event.thread_ts,
@@ -74,21 +75,21 @@ async function main() {
     );
 
     const res = await discourseAPI.post(title, discoursePost);
-
-    if (res.success) {
-      return web.chat.postMessage({
+    const discoursePostFailed = (e: Error) =>
+      slackWeb.chat.postMessage({
         channel: event.channel,
         thread_ts: event.thread_ts,
-        text: `Gosh, this _is_ an interesting conversation - I've filed a copy at ${res.url} for future reference!`,
+        text: `Sorry! I couldn't archive that. Discourse responded with: ${JSON.stringify(
+          e.message
+        )}`,
       });
-    }
-    web.chat.postMessage({
-      channel: event.channel,
-      thread_ts: event.thread_ts,
-      text: `Sorry! I couldn't archive that. Discourse responded with: ${JSON.stringify(
-        res.message
-      )}`,
-    });
+    const discoursePostSucceeded = (url: string) =>
+      slackWeb.chat.postMessage({
+        channel: event.channel,
+        thread_ts: event.thread_ts,
+        text: `Gosh, this _is_ an interesting conversation - I've filed a copy at ${url} for future reference!`,
+      });
+    fold(discoursePostFailed, discoursePostSucceeded)(res);
   });
 
   async function makePostFromMessagesInThread(
@@ -97,7 +98,7 @@ async function main() {
   ) {
     // https://api.slack.com/methods/conversations.replies
     const messages: SlackMessageEvent[] = await getAll(
-      web.conversations.replies,
+      slackWeb.conversations.replies,
       {
         channel,
         ts: threadParent,
@@ -119,12 +120,12 @@ async function main() {
   );
 
   function joinChannel(channel: string) {
-    web.channels.join({
+    slackWeb.channels.join({
       name: channel,
     });
   }
 
-  const server = await slackEvents.start(parseInt(serverPort));
+  const server = await slackEvents.start(parseInt(configuration.slack.port));
 
   const address = server.address();
   const port = isAddressInfo(address) ? address.port : address;

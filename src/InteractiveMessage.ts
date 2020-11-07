@@ -1,6 +1,7 @@
 import { createMessageAdapter } from "@slack/interactive-messages";
-import { configuration } from "./config";
+import { getConfiguration } from "./lib/Configuration";
 
-const slackInteractions = createMessageAdapter(
-  configuration.slack.signingSecret
-);
+export async function getSlackInteractions() {
+  const configuration = await getConfiguration();
+  return createMessageAdapter(configuration.slack.signingSecret);
+}

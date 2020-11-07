@@ -18,4 +18,4 @@ services:
     #   - SLACK_PROMO_MESSAGE= # Optional
     # Option 2: use a config.json on the local filesystem:
     # volumes:
-    #   - "./config.json:/usr/src/app/config.json"
+    #   - "./.env:/usr/src/app/.env"

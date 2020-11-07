@@ -1,5 +1,6 @@
-export function removeUsernameTag(msg: string) {
-  return msg.startsWith("<") ? msg.substr(msg.indexOf(">") + 1).trim() : msg;
+export function removeBotnameTag(msg: string, botname: string) {
+  const botnameTag = `<${botname}>`;
+  return msg.includes(botnameTag) ? msg.replace(botnameTag, "") : msg;
 }
 
 export function isCommand(msg: string) {
