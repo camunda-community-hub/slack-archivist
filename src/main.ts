@@ -84,6 +84,10 @@ async function main() {
       event.thread_ts!
     );
 
+    // tslint:disable-next-line: no-console
+    console.log("Title", title);
+    console.log("Post", discourseAPI); // @DEBUG
+
     const res = await discourseAPI.post(title, discoursePost);
     const discoursePostFailed = (e: Error) =>
       slackWeb.chat.postMessage({
