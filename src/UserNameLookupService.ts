@@ -1,4 +1,4 @@
-import { WebClient } from "@slack/web-api";
+import { cursorPaginationEnabledMethods, WebClient } from "@slack/web-api";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { getAll } from "./webapi-pagination";
 import { SlackConfigObject } from "./lib/Configuration";
@@ -63,10 +63,15 @@ export class UserNameLookupService {
     // https://api.slack.com/methods/users.list
     console.log("Fetching user list from Slack...");
     const users = await getAll(this.slackWeb.users.list, {}, "members");
-    users.forEach(
-      (user) =>
-        (this.userCache[user.id] = user.profile?.display_name || user.name)
+
+    this.userCache = users.reduce(
+      (users, user) => ({
+        ...users,
+        [user.id]: user.profile?.display_name || user.name,
+      }),
+      {}
     );
+
     console.log(`Fetched ${users?.length} from Slack via user.list`);
     try {
       writeFileSync(CACHEFILE, JSON.stringify(this.userCache, null, 2));
