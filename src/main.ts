@@ -16,11 +16,9 @@ require("dotenv").config();
 
 async function main() {
   const configuration = await getConfiguration();
-  // tslint:disable-next-line: no-console
-  console.log("configuration", configuration); // @DEBUG
 
   const discourseAPI = new DiscourseAPI(configuration.discourse);
-  const { slackEvents, slackWeb } = await getSlack(configuration.slack);
+  const { slackEvents, slackWeb } = getSlack(configuration.slack);
   const userlookup = new UserNameLookupService(slackWeb, configuration.slack);
   const postBuilder = new PostBuilder({
     slackPromoMessage: promoText,
