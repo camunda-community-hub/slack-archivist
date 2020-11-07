@@ -14,6 +14,18 @@ import { helpText } from "./messages/help";
 
 require("dotenv").config();
 
+// @DEBUG
+import path from "path";
+import fs from "fs";
+
+console.log(process.cwd());
+const filepath = path.resolve(process.cwd(), ".env");
+console.log(filepath);
+console.log(fs.readdirSync(process.cwd(), { withFileTypes: true }));
+console.log(fs.readFileSync(filepath, "utf-8"));
+
+// @DEBUG:end
+
 async function main() {
   const configuration = await getConfiguration();
   const discourseAPI = new DiscourseAPI(configuration.discourse);
