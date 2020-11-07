@@ -1,12 +1,14 @@
 export function removeBotnameTag(msg: string, botname: string) {
   const botnameTag = `<@${botname}>`;
-  return msg.includes(botnameTag) ? msg.replace(botnameTag, "") : msg;
+  return msg.includes(botnameTag)
+    ? msg.replace(botnameTag, "").trim()
+    : msg.trim();
 }
 
 export function isCommand(msg: string) {
-  return msg.startsWith("--");
+  return msg.trim().startsWith("--");
 }
 
 export function parseCommand(msg: string) {
-  return msg.substr(2);
+  return msg.trim().substr(2);
 }
