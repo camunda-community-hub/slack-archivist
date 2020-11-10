@@ -103,7 +103,7 @@ async function main() {
 
     const existingUrl = postBuilder.hasAlreadyBeenArchived();
     if (existingUrl) {
-      const existingPost = await discourseAPI.get(existingUrl);
+      const existingPost = await discourseAPI.getPost(existingUrl);
       if (existingPost) {
         return slackWeb.chat.postEphemeral({
           user: event.user,
@@ -123,7 +123,7 @@ async function main() {
     console.log("Title", title);
     console.log("Post", discoursePost); // @DEBUG
 
-    const res = await discourseAPI.post(title, discoursePost);
+    const res = await discourseAPI.createNewPost(title, discoursePost);
     const discoursePostFailed = (e: Error) => {
       slackWeb.chat.postEphemeral({
         user: event.user,

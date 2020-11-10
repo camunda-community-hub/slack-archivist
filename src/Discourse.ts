@@ -4,6 +4,7 @@
 import Axios, { AxiosInstance } from "axios";
 import * as E from "fp-ts/Either";
 import { DiscourseConfigObject } from "./lib/Configuration";
+import { RateLimiter } from "./lib/Ratelimiter";
 
 export interface DiscourseSuccessMessage {
   message: string;
@@ -15,6 +16,7 @@ export interface DiscourseSuccessMessage {
 export class DiscourseAPI {
   private http: AxiosInstance;
   private config: DiscourseConfigObject;
+  private limit: RateLimiter;
   constructor(config: DiscourseConfigObject) {
     // To get your category id
     // http
@@ -30,34 +32,42 @@ export class DiscourseAPI {
         Accept: "application/json",
       },
     });
+    this.limit = new RateLimiter(500);
   }
 
-  async post(
+  async createNewPost(
     title: string,
     discoursePost: string
   ): Promise<E.Either<Error, DiscourseSuccessMessage>> {
-    return this.http
-      .post("/posts.json", {
-        title,
-        raw: discoursePost,
-        category: this.config.category,
-      })
-      .then(({ data }) =>
-        E.right({
-          message: `${this.config.url}t/${data.topic_slug}/${data.topic_id}`,
-          baseURL: this.config.url,
-          topic_slug: data.topic_slug,
-          topic_id: data.topic_id,
-        })
-      )
-      .catch((e) => E.left(new Error(e?.response?.data?.errors || e.message)));
+    return this.limit.runRateLimited({
+      task: () =>
+        this.http
+          .post("/posts.json", {
+            title,
+            raw: discoursePost,
+            category: this.config.category,
+          })
+          .then(({ data }) =>
+            E.right({
+              message: `${this.config.url}t/${data.topic_slug}/${data.topic_id}`,
+              baseURL: this.config.url,
+              topic_slug: data.topic_slug,
+              topic_id: data.topic_id,
+            })
+          )
+          .catch((e) =>
+            E.left(new Error(e?.response?.data?.errors || e.message))
+          ),
+    });
   }
 
-  async get(url: string) {
+  async getPost(url: string) {
     const ids = url.substr(url.indexOf("t/"));
     const id = ids.substr(ids.indexOf("/") + 1);
     try {
-      const res = await this.http.get(`/posts/${id}.json`);
+      const res = await this.limit.runRateLimited({
+        task: () => this.http.get(`/posts/${id}.json`),
+      });
       return res.data;
     } catch (e) {
       return false;
