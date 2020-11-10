@@ -52,6 +52,12 @@ You will need to set up the Event Subscriptions for the bot, like this:
 
 ![](img/event-subscriptions.png)
 
+## Database
+
+The Slack Archivist bot uses a PouchDB to track the threads that it has archived. The database is created locally using the leveldown adapter in the `slack-archivist-db` directory, so you should mount that into the docker container to ensure its persistence across container lifecycles.
+
+You can optionally provide a `COUCHDB_URL` via the environment to sync the database with a remote CouchDB instance. This is recommended to ensure the persistence of data. You can start a CouchDB instance easily in Google Cloud using [Bitnami](https://bitnami.com/stack/couchdb/cloud/google), or use [IBM Cloudant](https://www.ibm.com/cloud/cloudant).
+
 ## Running from Docker
 
 Read the `docker-compose.yml` file and set up either the environment variables or a `.env` file. Then run:
@@ -84,7 +90,13 @@ DISCOURSE_URL
 SLACK_TOKEN
 SLACK_SIGNING_SECRET
 SLACK_BOTNAME
-SLACK_PORT
+
+# Optional
+SLACK_PORT # Default: 3000
+
+COUCHDB_URL # For syncing
+
+
 ```
 
 You can set these through your environment, or put them into a `.env` file.

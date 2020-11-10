@@ -13,3 +13,9 @@ When you tag me, put the text you want as the post title. For example:
 I don't respond to DMs, but you can chat to me in #archivist.
 
 [Read more in the forum](https://forum.zeebe.io/t/about-the-knowledge-from-slack-category/976).`;
+
+export const notThreadedMessage =
+  "Tag me _in a threaded reply_ with what you want as the post title, and I'll put the thread in the Forum for you. If there are no replies, you can reply to the OP (your reply makes a thread) and tag me in that reply.";
+
+export const noTitle =
+  "Tag me with what you want as the post title, and I'll put this thread in the Forum for you.\n\nFor example:\n\n@archivist How do I collect the output of a multi-instance sub-process?";

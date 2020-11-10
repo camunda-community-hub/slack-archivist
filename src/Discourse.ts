@@ -1,12 +1,19 @@
 // https://docs.discourse.org/
 // https://meta.discourse.org/t/how-to-reverse-engineer-the-discourse-api/20576
 // https://meta.discourse.org/t/how-to-turn-off-a-checker-for-title-seems-unclear-is-it-a-complete-sentence/55070/12
-import Axios from "axios";
+import Axios, { AxiosInstance } from "axios";
 import * as E from "fp-ts/Either";
 import { DiscourseConfigObject } from "./lib/Configuration";
 
+export interface DiscourseSuccessMessage {
+  message: string;
+  baseURL: string;
+  topic_slug: string;
+  topic_id: string;
+}
+
 export class DiscourseAPI {
-  private http: any;
+  private http: AxiosInstance;
   private config: DiscourseConfigObject;
   constructor(config: DiscourseConfigObject) {
     // To get your category id
@@ -28,7 +35,7 @@ export class DiscourseAPI {
   async post(
     title: string,
     discoursePost: string
-  ): Promise<E.Either<Error, string>> {
+  ): Promise<E.Either<Error, DiscourseSuccessMessage>> {
     return this.http
       .post("/posts.json", {
         title,
@@ -36,8 +43,24 @@ export class DiscourseAPI {
         category: this.config.category,
       })
       .then(({ data }) =>
-        E.right(`${this.config.url}t/${data.topic_slug}/${data.topic_id}`)
+        E.right({
+          message: `${this.config.url}t/${data.topic_slug}/${data.topic_id}`,
+          baseURL: this.config.url,
+          topic_slug: data.topic_slug,
+          topic_id: data.topic_id,
+        })
       )
       .catch((e) => E.left(new Error(e?.response?.data?.errors || e.message)));
+  }
+
+  async get(url: string) {
+    const ids = url.substr(url.indexOf("t/"));
+    const id = ids.substr(ids.indexOf("/") + 1);
+    try {
+      const res = await this.http.get(`/posts/${id}.json`);
+      return res.data;
+    } catch (e) {
+      return false;
+    }
   }
 }

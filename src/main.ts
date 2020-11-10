@@ -2,7 +2,7 @@ import { AddressInfo } from "net";
 import { SlackMessageEvent } from "./lib/SlackMessage";
 import { getAll } from "./webapi-pagination";
 import { UserNameLookupService } from "./UserNameLookupService";
-import { DiscourseAPI } from "./Discourse";
+import { DiscourseAPI, DiscourseSuccessMessage } from "./Discourse";
 import { getConfiguration } from "./lib/Configuration";
 import { PostBuilder } from "./PostBuilder";
 import { getSlack } from "./Slack";
@@ -10,20 +10,19 @@ import { isCommand, parseCommand, removeBotnameTag } from "./lib/utils";
 import { executeCommand } from "./Command";
 import { promoText } from "./messages/promo";
 import { fold } from "fp-ts/lib/Either";
-import { helpText } from "./messages/help";
+import { helpText, noTitle, notThreadedMessage } from "./messages/help";
+import { createSuccessMessage } from "./messages/post-success";
+import { getDB } from "./DB";
 
 require("dotenv").config();
 
 async function main() {
   const configuration = await getConfiguration();
-
+  const db = getDB(configuration);
+  db.info().then(console.log);
   const discourseAPI = new DiscourseAPI(configuration.discourse);
   const { slackEvents, slackWeb } = getSlack(configuration.slack);
   const userlookup = new UserNameLookupService(slackWeb, configuration.slack);
-  const postBuilder = new PostBuilder({
-    slackPromoMessage: promoText,
-    userMap: await userlookup.getUsernameDictionary(),
-  });
 
   slackEvents.on("message", (event: SlackMessageEvent) => {
     //   console.log(
@@ -33,7 +32,14 @@ async function main() {
 
   slackEvents.on("channel_joined", (event) => console.log);
 
-  // Greet new users
+  // For when someone mentions the bot in a new channel
+  slackEvents.on("link_shared", (event: SlackMessageEvent) =>
+    slackWeb.channels.join({
+      name: event.channel,
+    })
+  );
+
+  // Greet new users with the help text in a DM
   slackEvents.on("team_join", (event) => {
     const { user } = event;
     slackWeb.chat.postMessage({
@@ -43,9 +49,13 @@ async function main() {
     });
   });
 
+  /** Archive a thread */
   slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
     const isThreadedMessage = (event: SlackMessageEvent) => !!event.thread_ts;
-    joinChannel(event.channel);
+    // Make sure the bot is in the channel
+    slackWeb.channels.join({
+      name: event.channel,
+    });
     const msg = removeBotnameTag(event.text, await userlookup.getBotUserId());
 
     if (isCommand(msg)) {
@@ -62,8 +72,7 @@ async function main() {
         user: event.user,
         channel: event.channel,
         thread_ts: event.thread_ts,
-        text:
-          "Tag me _in a threaded reply_ with what you want as the post title, and I'll put the thread in the Forum for you. If there are no replies, you can reply to the OP (your reply makes a thread) and tag me in that reply.",
+        text: notThreadedMessage,
       });
     }
 
@@ -74,71 +83,74 @@ async function main() {
         user: event.user,
         channel: event.channel,
         thread_ts: event.thread_ts,
-        text:
-          "Tag me with what you want as the post title, and I'll put this thread in the Forum for you.\n\nFor example:\n\n@archivist How do I collect the output of a multi-instance sub-process?",
+        text: noTitle,
       });
     }
     console.log("Threaded message - Creating Discourse Post");
-    const discoursePost = await makePostFromMessagesInThread(
-      event.channel,
-      event.thread_ts!
-    );
+
+    const postBuilder = new PostBuilder({
+      slackPromoMessage: promoText,
+      userMap: await userlookup.getUsernameDictionary(),
+      messages: await getAll(
+        slackWeb.conversations.replies,
+        {
+          channel: event.channel,
+          ts: event.thread_ts!,
+        },
+        "messages"
+      ),
+    });
+
+    const existingUrl = postBuilder.hasAlreadyBeenArchived();
+    if (existingUrl) {
+      const existingPost = await discourseAPI.get(existingUrl);
+      if (existingPost) {
+        return slackWeb.chat.postEphemeral({
+          user: event.user,
+          channel: event.channel,
+          thread: event.thread_ts,
+          text: `This is already archived at ${existingUrl}.`,
+        });
+      } else {
+        // We saw a message from Slack Archivist saying it was already archived, but the post was not
+        // found in Discourse - this means it was probably deleted from Discourse
+        // We need to remove the sync record from the database
+      }
+    }
+    const discoursePost = await postBuilder.buildMarkdownPost();
 
     // tslint:disable-next-line: no-console
     console.log("Title", title);
     console.log("Post", discoursePost); // @DEBUG
 
     const res = await discourseAPI.post(title, discoursePost);
-    const discoursePostFailed = (e: Error) =>
+    const discoursePostFailed = (e: Error) => {
       slackWeb.chat.postEphemeral({
         user: event.user,
         channel: event.channel,
-        thread_ts: event.thread_ts,
         text: `Sorry! I couldn't archive that. Discourse responded with: ${JSON.stringify(
           e.message
         )}`,
       });
-    const discoursePostSucceeded = (url: string) =>
+    };
+    const discoursePostSucceeded = (res: DiscourseSuccessMessage) => {
       slackWeb.chat.postMessage({
         channel: event.channel,
         thread_ts: event.thread_ts,
-        text: `Gosh, this _is_ an interesting conversation - I've filed a copy at ${url} for future reference!`,
+        text: createSuccessMessage(res.message),
       });
+      db.put({
+        _id: event.thread_ts,
+        post: discoursePost,
+        title,
+        url: res.message,
+        baseUrl: res.baseURL,
+        topic_slug: res.topic_slug,
+        topic_id: res.topic_id,
+      });
+    };
     fold(discoursePostFailed, discoursePostSucceeded)(res);
   });
-
-  async function makePostFromMessagesInThread(
-    channel: string,
-    threadParent: string
-  ) {
-    // https://api.slack.com/methods/conversations.replies
-    const messages: SlackMessageEvent[] = await getAll(
-      slackWeb.conversations.replies,
-      {
-        channel,
-        ts: threadParent,
-      },
-      "messages"
-    );
-
-    // console.log(JSON.stringify(messages, null, 2)); // debug
-
-    // Remove the last message, because it is the call to the bot
-    messages.pop();
-
-    return postBuilder.buildMarkdownPost(messages);
-  }
-
-  // For when someone mentions the bot in a new channel
-  slackEvents.on("link_shared", (event: SlackMessageEvent) =>
-    joinChannel(event.channel)
-  );
-
-  function joinChannel(channel: string) {
-    slackWeb.channels.join({
-      name: channel,
-    });
-  }
 
   const server = await slackEvents.start(parseInt(configuration.slack.port));
 

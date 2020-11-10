@@ -15,10 +15,24 @@ const SlackConfig = t.type({
   port: t.string,
 });
 
+const DBConfig = t.partial({
+  url: t.string,
+});
+
 export type SlackConfigObject = t.TypeOf<typeof SlackConfig>;
 export type DiscourseConfigObject = t.TypeOf<typeof DiscourseConfig>;
+export type DBConfigObject = t.TypeOf<typeof DBConfig>;
+export type Configuration = {
+  slack: SlackConfigObject;
+  discourse: DiscourseConfigObject;
+  db: DBConfigObject;
+};
 
 export async function getConfiguration() {
+  const db = await tPromise.decode(DBConfig)({
+    url: process.env.COUCHDB_URL,
+  });
+
   const discourse = await tPromise.decode(DiscourseConfig)({
     category: process.env.DISCOURSE_CATEGORY,
     token: process.env.DISCOURSE_TOKEN,
@@ -33,6 +47,7 @@ export async function getConfiguration() {
     port: process.env.SLACK_PORT || "3000",
   });
   return {
+    db,
     discourse,
     slack,
   };

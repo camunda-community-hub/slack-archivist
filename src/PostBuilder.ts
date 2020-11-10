@@ -1,4 +1,5 @@
 import { SlackMessageEvent } from "./lib/SlackMessage";
+import { createSuccessMessage } from "./messages/post-success";
 import { UserCache } from "./UserNameLookupService";
 
 interface ParsedMessage {
@@ -9,19 +10,45 @@ interface ParsedMessage {
 export class PostBuilder {
   slackPromoMessage: string | undefined;
   userMap: UserCache;
+  messages: SlackMessageEvent[];
 
   constructor({
     userMap,
     slackPromoMessage,
+    messages,
   }: {
     slackPromoMessage?: string;
     userMap: UserCache;
+    messages: SlackMessageEvent[];
   }) {
     this.slackPromoMessage = slackPromoMessage;
     this.userMap = userMap;
+    // Remove the last message, because it is the call to the bot
+    messages.pop();
+    this.messages = messages;
   }
 
-  buildMarkdownPost(messages: SlackMessageEvent[]) {
+  hasAlreadyBeenArchived() {
+    const uniqueString = "_x_^_0_";
+    const archivistMessage = createSuccessMessage(uniqueString);
+    const archivistFragment = archivistMessage.substring(
+      0,
+      archivistMessage.indexOf(uniqueString)
+    );
+    const previousArchive = this.messages.filter((message) =>
+      message.text.includes(archivistFragment)
+    );
+    if (previousArchive.length === 0) return false;
+    const previousArchiveMessage = previousArchive[0].text;
+
+    const urlStartsAt = archivistMessage.indexOf(uniqueString);
+    return previousArchiveMessage.substring(
+      urlStartsAt,
+      previousArchiveMessage.indexOf(" ", urlStartsAt)
+    );
+  }
+
+  buildMarkdownPost() {
     const optionallyAddSlackPromo = (messages) =>
       this.slackPromoMessage
         ? [
@@ -34,7 +61,7 @@ export class PostBuilder {
         : messages;
 
     return optionallyAddSlackPromo(
-      this.replaceUsercodesWithNames(this.threadMessages(messages))
+      this.replaceUsercodesWithNames(this.threadMessages(this.messages))
     ).reduce(
       (prev, message) => `${prev}
 
