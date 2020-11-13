@@ -8,4 +8,4 @@ DISCOURSE_USER=archivist
 DISCOURSE_URL=https://forum.zeebe.io/
 DISCOURSE_CATEGORY=16
 
-COUCHDB_URL=username:password@url/database_name
+COUCHDB_URL=http://username:password@url/database_name
