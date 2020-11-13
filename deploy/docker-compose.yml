@@ -2,6 +2,7 @@ version: "2"
 
 services:
   archivist:
+    user: root
     image: sitapati/slack-archivist:latest
     restart: always
     container_name: slack-archivist
