@@ -7,7 +7,7 @@ import { DiscourseConfigObject } from "./lib/Configuration";
 import { RateLimiter } from "./lib/Ratelimiter";
 
 export interface DiscourseSuccessMessage {
-  message: string;
+  url: string;
   baseURL: string;
   topic_slug: string;
   topic_id: string;
@@ -49,7 +49,7 @@ export class DiscourseAPI {
           })
           .then(({ data }) =>
             E.right({
-              message: `${this.config.url}t/${data.topic_slug}/${data.topic_id}`,
+              url: `${this.config.url}t/${data.topic_slug}/${data.topic_id}`,
               baseURL: this.config.url,
               topic_slug: data.topic_slug,
               topic_id: data.topic_id,

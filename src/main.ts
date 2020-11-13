@@ -13,6 +13,7 @@ import { fold } from "fp-ts/lib/Either";
 import { helpText, noTitle, notThreadedMessage } from "./messages/help";
 import { createSuccessMessage } from "./messages/post-success";
 import { getDB } from "./DB";
+import { v4 as uuid } from "uuid";
 
 require("dotenv").config();
 
@@ -24,13 +25,14 @@ async function main() {
   const { slackEvents, slackWeb } = getSlack(configuration.slack);
   const userlookup = new UserNameLookupService(slackWeb, configuration.slack);
 
+  // Listens to all messages - I think...
   slackEvents.on("message", (event: SlackMessageEvent) => {
     //   console.log(
     //     `Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`
     //   );
   });
 
-  slackEvents.on("channel_joined", (event) => console.log);
+  slackEvents.on("channel_joined", (event) => console.log(event));
 
   // For when someone mentions the bot in a new channel
   slackEvents.on("link_shared", (event: SlackMessageEvent) =>
@@ -101,20 +103,52 @@ async function main() {
       ),
     });
 
-    const existingUrl = postBuilder.hasAlreadyBeenArchived();
-    if (existingUrl) {
-      const existingPost = await discourseAPI.getPost(existingUrl);
+    const op = postBuilder.getOP();
+    const existingPostFromDb = await db.find({
+      selector: { op: op.event_ts },
+    });
+
+    if (existingPostFromDb.docs.length > 0) {
+      const existingPost = await discourseAPI.getPost(
+        existingPostFromDb.docs[0].url
+      );
       if (existingPost) {
         return slackWeb.chat.postEphemeral({
           user: event.user,
           channel: event.channel,
           thread: event.thread_ts,
-          text: `This is already archived at ${existingUrl}.`,
+          text: `This is already archived at ${existingPostFromDb.docs[0].url}.`,
         });
       } else {
-        // We saw a message from Slack Archivist saying it was already archived, but the post was not
-        // found in Discourse - this means it was probably deleted from Discourse
-        // We need to remove the sync record from the database
+        console.log(
+          `The database says this was already archived, but we can't find it in Discourse`
+        );
+        // Should we delete the database record?
+      }
+    }
+
+    /**
+     * This is here as a fallback for the database. If the database is lost, we may
+     * be able to detect an attempt to archive an already archived thread by seeing the
+     * earlier message from the Slack Archivist saying it was archived.
+     *
+     * If we find one, we check the URL to see if it is actually in Discourse. It may
+     * have been deleted, and a user may be attempting to re-archive it.
+     */
+    const existingUrlFromThread = postBuilder.hasAlreadyBeenArchived();
+    if (existingUrlFromThread) {
+      const existingPost = await discourseAPI.getPost(existingUrlFromThread);
+      if (existingPost) {
+        return slackWeb.chat.postEphemeral({
+          user: event.user,
+          channel: event.channel,
+          thread: event.thread_ts,
+          text: `This is already archived at ${existingUrlFromThread}.`,
+        });
+      } else {
+        console.log(
+          `There is a message in the thread saying this was already archived, but we can't find it in Discourse`
+        );
       }
     }
     const discoursePost = await postBuilder.buildMarkdownPost();
@@ -137,13 +171,14 @@ async function main() {
       slackWeb.chat.postMessage({
         channel: event.channel,
         thread_ts: event.thread_ts,
-        text: createSuccessMessage(res.message),
+        text: createSuccessMessage(res.url),
       });
       db.put({
-        _id: event.thread_ts,
+        _id: uuid(),
+        op: op.event_ts,
         post: discoursePost,
         title,
-        url: res.message,
+        url: res.url,
         baseUrl: res.baseURL,
         topic_slug: res.topic_slug,
         topic_id: res.topic_id,

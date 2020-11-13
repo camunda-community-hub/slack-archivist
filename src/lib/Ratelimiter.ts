@@ -1,70 +1,80 @@
-interface QueuedTask {
-  task: () => any;
+interface QueuedTask<T> {
+  task: () => T;
   promise: {
     resolve: (res: any) => void;
     reject: (err: any) => void;
   };
 }
+
+interface RateLimitedTask<T> {
+  task: () => T;
+  /**
+   * Default: false. Set true to allow this to be bumped by other operations.
+   * Use this, for example, for non-UI background async tasks.
+   */
+  preemptible?: boolean;
+}
+
+/**
+ * Rate limit operations, for example: to avoid saturating an API with calls
+ */
 export class RateLimiter {
-  private everyMs: number;
-  private priorityQueue: QueuedTask[] = [];
-  private lowPriorityQueue: QueuedTask[] = [];
+  private debounceMs: number;
+  private priorityQueue: QueuedTask<any>[] = [];
+  private preemptibleQueue: QueuedTask<any>[] = [];
   private rateLimiting?: NodeJS.Timeout;
 
-  constructor(everyMs: number) {
-    this.everyMs = everyMs;
+  /**
+   *
+   * @param rateLimitToMs minimum number of milliseconds between operations
+   */
+  constructor(rateLimitToMs: number) {
+    this.debounceMs = rateLimitToMs;
   }
 
-  private scheduleNextTask() {
-    if (this.rateLimiting) {
-      return;
-    }
-    this.runImmediately();
-  }
-
-  private runImmediately() {
-    let toRun: QueuedTask | undefined;
-    if (this.priorityQueue.length > 0) {
-      toRun = this.priorityQueue.pop();
-    } else if (this.lowPriorityQueue.length > 0) {
-      toRun = this.lowPriorityQueue.pop();
-    }
-    if (toRun === undefined) {
-      return;
-    }
-    if (this.priorityQueue.length > 0 || this.lowPriorityQueue.length > 0) {
-      this.rateLimiting = setTimeout(() => {
-        this.rateLimiting = undefined;
-        this.runImmediately();
-      }, this.everyMs);
-    }
-    toRun
-      .task()
-      .then((res) => toRun!.promise.resolve(res))
-      .catch((err) => toRun!.promise.reject(err));
-  }
-
-  runRateLimited<T>({
-    task,
-    lowPriority,
-  }: {
-    task: () => T;
-    lowPriority?: boolean;
-  }): Promise<T> {
+  /**
+   *
+   * @param req {RateLimitedTask}
+   */
+  runRateLimited<T>(req: RateLimitedTask<T>): Promise<T> {
     const result = new Promise<T>((resolve, reject) => {
-      if (lowPriority) {
-        this.lowPriorityQueue.push({
-          task,
-          promise: { resolve, reject },
-        });
-      } else {
-        this.priorityQueue.push({
-          task,
-          promise: { resolve, reject },
-        });
-      }
+      const queue = req.preemptible
+        ? this.preemptibleQueue
+        : this.priorityQueue;
+      queue.push({
+        task: req.task,
+        promise: { resolve, reject },
+      });
     });
     this.scheduleNextTask();
     return result;
+  }
+
+  private scheduleNextTask() {
+    if (!this.rateLimiting) {
+      this.runImmediately();
+    }
+  }
+
+  private runImmediately() {
+    const toRun: QueuedTask<any> | undefined = this.priorityQueue.length
+      ? this.priorityQueue.pop()
+      : this.preemptibleQueue.pop();
+
+    if (!toRun) {
+      return;
+    }
+
+    const hasQueuedTasks =
+      !!this.priorityQueue.length || !!this.preemptibleQueue.length;
+
+    if (hasQueuedTasks) {
+      this.rateLimiting = setTimeout(() => {
+        this.rateLimiting = undefined;
+        this.runImmediately();
+      }, this.debounceMs);
+    }
+    const promise = toRun.promise;
+    toRun.task().then(promise.resolve).catch(promise.reject);
   }
 }

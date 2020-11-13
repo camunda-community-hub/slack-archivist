@@ -4,4 +4,4 @@ dist
 .env
 user-cache.json
 .DS_Store
-slack-archivist-db
+db/

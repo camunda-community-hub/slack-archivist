@@ -12,6 +12,7 @@ services:
       - LETSENCRYPT_EMAIL=josh@magikcraft.io
     volumes:
       - "${PWD}/.env:/usr/src/app/.env"
+      - "${PWD}/db:/usr/src/app/db"
   # This is the network for the nginx proxy
   # See https://github.com/jwulf/letsencrypt-nginx-sidecar
 networks:

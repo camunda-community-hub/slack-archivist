@@ -7,3 +7,5 @@ DISCOURSE_TOKEN=5ba8658f01df5fdeb3935052a0b4f34ac43db9feda6f6da2cacf807bc7892cf0
 DISCOURSE_USER=archivist
 DISCOURSE_URL=https://forum.zeebe.io/
 DISCOURSE_CATEGORY=16
+
+COUCHDB_URL=username:password@url/database_name

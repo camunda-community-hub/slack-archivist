@@ -32,21 +32,21 @@ Here are the [instructions about creating a bot user on Slack](https://api.slack
 
 The bot will need the following scopes in its OAuth settings:
 
-* app_mentions:read
-* channels:history
-* channels:join
-* channels:read
-* chat:write
-* im:history
-* im:read
-* im:write
-* incoming-webhook
-* links:read
-* links:write
-* reactions:write
-* users.profile:read
-* users:read
-* users:write
+- app_mentions:read
+- channels:history
+- channels:join
+- channels:read
+- chat:write
+- im:history
+- im:read
+- im:write
+- incoming-webhook
+- links:read
+- links:write
+- reactions:write
+- users.profile:read
+- users:read
+- users:write
 
 You will need to set up the Event Subscriptions for the bot, like this:
 
@@ -70,7 +70,7 @@ If you want to run this using https, you can do it easily using the [Nginx / Let
 
 ## Installation from source
 
-To install, clone the repository, then run: 
+To install, clone the repository, then run:
 
 ```
 npm i
@@ -95,19 +95,17 @@ SLACK_BOTNAME
 SLACK_PORT # Default: 3000
 
 COUCHDB_URL # For syncing
-
-
 ```
 
 You can set these through your environment, or put them into a `.env` file.
 
-Rename `env` to `.env`, and fill in your Slack bot and Discord details. 
+Rename `env` to `.env`, and fill in your Slack bot and Discord details.
 
 The message templates for the Slack Archivist messages can be found in the `messages` directory.
 
 ## Running
 
-You can run the bot using `ts-node`: 
+You can run the bot using `ts-node`:
 
 ```
 npm i -g ts-node
@@ -129,14 +127,14 @@ The bot behaviour is described in the [Behaviour.bpmn](Behaviour.bpmn) file.
 
 ![](img/Behaviour.png)
 
-## Livestream 
+## Livestream
 
 I livestreamed a lot of the coding:
 
-* [Building a Slack bot - Slack Archivist for the Zeebe Community: Part 1 of 2](https://youtu.be/v5CkZb-xlBc)
+- [Building a Slack bot - Slack Archivist for the Zeebe Community: Part 1 of 2](https://youtu.be/v5CkZb-xlBc)
 
-* [Building a Slack bot - Slack Archivist for the Zeebe Community: Part 2 of 2](https://youtu.be/n3zDiqRgW0o)
+- [Building a Slack bot - Slack Archivist for the Zeebe Community: Part 2 of 2](https://youtu.be/n3zDiqRgW0o)
 
 ## Resources
 
-* [Slack event JSON Schema](https://github.com/slackapi/slack-api-specs/blob/master/events-api/slack_common_event_wrapper_schema.json)
+- [Slack event JSON Schema](https://github.com/slackapi/slack-api-specs/blob/master/events-api/slack_common_event_wrapper_schema.json)

@@ -28,6 +28,10 @@ export class PostBuilder {
     this.messages = messages;
   }
 
+  /**
+   * Scans back through the messages to see if the Archivist reported that it
+   * archived it earlier in the conversation.
+   */
   hasAlreadyBeenArchived() {
     const uniqueString = "_x_^_0_";
     const archivistMessage = createSuccessMessage(uniqueString);
@@ -46,6 +50,13 @@ export class PostBuilder {
       urlStartsAt,
       previousArchiveMessage.indexOf(" ", urlStartsAt)
     );
+  }
+
+  getOP() {
+    const messageIsThreadParent = (event: SlackMessageEvent) =>
+      event.thread_ts === event.ts;
+
+    return this.messages.filter(messageIsThreadParent)[0];
   }
 
   buildMarkdownPost() {
