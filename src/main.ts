@@ -20,7 +20,7 @@ require("dotenv").config();
 async function main() {
   const configuration = await getConfiguration();
   const db = getDB(configuration);
-  db.info().then(console.log);
+  db.info().then((res) => console.log("Database info:", res));
   const discourseAPI = new DiscourseAPI(configuration.discourse);
   const { slackEvents, slackWeb } = getSlack(configuration.slack);
   const userlookup = new UserNameLookupService(slackWeb, configuration.slack);

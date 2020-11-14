@@ -26,7 +26,6 @@
     "@slack/events-api": "^2.3.1",
     "@slack/interactive-messages": "^1.7.0",
     "@slack/web-api": "^5.7.0",
-
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "fp-ts": "^2.8.5",

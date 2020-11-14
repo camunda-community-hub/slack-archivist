@@ -1,5 +1,5 @@
 import PouchDB from "pouchdb-node";
-import { Configuration, getConfiguration } from "./lib/Configuration";
+import { Configuration } from "./lib/Configuration";
 import fs from "fs";
 import path from "path";
 
@@ -32,32 +32,36 @@ export function getDB(conf: Configuration) {
 
   db = new PouchDB("db/slack-archivist-db");
 
+  const indexError = (msg) =>
+    console.log("Error creating database index:", msg);
+  const indexSuccess = (msg) => console.log("Database index:", msg);
   db.createIndex({
     index: {
       fields: ["op"],
     },
   })
-    .then(console.log)
-    .catch(console.log);
+    .then(indexSuccess)
+    .catch(indexError);
   db.createIndex({
     index: {
       fields: ["url"],
     },
   })
-    .then(console.log)
-    .catch(console.log);
+    .then(indexSuccess)
+    .catch(indexError);
 
   if (conf.db.url) {
     const remoteCouch = new PouchDB(conf.db.url);
     console.log(`Setting up sync with remote CouchDB...`);
-    // @DEBUG
-    console.log(remoteCouch); // @DEBUG
     db.sync(remoteCouch, { live: true, retry: true })
       .on("denied", (info) => console.log("Replication denied", info))
       .on("error", (err) => console.error("DB Sync Error", err))
       .on("active", () => console.log("DB Sync active"))
       .on("paused", (info) => console.log("Paused DB Sync", info));
-    remoteCouch.allDocs().then(console.log); // @DEBUG
+
+    // remoteCouch
+    //   .allDocs({ include_docs: true })
+    //   .then((res) => console.log(JSON.stringify(res, null, 2))); // @DEBUG
   }
   return db;
 }
