@@ -26,11 +26,13 @@ async function main() {
   log.info(chalk.greenBright("***** Starting the Slack Archivist bot *****\n"));
   const db = await getDB(configuration);
   const discourseAPI = new DiscourseAPI(configuration.discourse);
-  const { slackEvents, slackWeb } = getSlack(configuration.slack);
+  const { slackEvents, slackWeb, slackInteractive } = getSlack(
+    configuration.slack
+  );
   const userlookup = new UserNameLookupService(slackWeb, configuration.slack);
 
   // Listens to all messages - I think...
-  slackEvents.on("message", (event: SlackMessageEvent) => {
+  slackEvents.on("message.channels", (event: SlackMessageEvent) => {
     log.info(
       `Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`
     );
