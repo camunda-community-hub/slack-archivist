@@ -1,7 +1,9 @@
-import { cursorPaginationEnabledMethods, WebClient } from "@slack/web-api";
+import { WebClient } from "@slack/web-api";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { getAll } from "./webapi-pagination";
 import { SlackConfigObject } from "./lib/Configuration";
+import { getLogger } from "./lib/Log";
+import winston from "winston";
 
 const CACHEFILE = "./user-cache.json";
 type Username = string;
@@ -13,26 +15,36 @@ export class UserNameLookupService {
   userCache: UserCache;
   ready: Promise<void>;
   botname: string;
+  log!: winston.Logger;
   constructor(slackWeb: WebClient, slackConfig: SlackConfigObject) {
     this.slackWeb = slackWeb;
     this.userCache = {};
     this.botname = slackConfig.botname;
-    if (existsSync(CACHEFILE)) {
-      try {
-        this.userCache = JSON.parse(readFileSync(CACHEFILE, "utf8"));
-        console.log(
-          `Read ${Object.keys(this.userCache).length} users from disk cache...`
-        );
-        this.getBotUserId().then((id) => console.log("botuser id", id));
-        this.ready = Promise.resolve();
-      } catch (e) {
-        console.log(e);
-        console.log("This was a non-fatal error loading the user cache");
-        this.ready = this.fetchAndCacheUserList();
+    this.ready = getLogger("Slack Users").then((logger) => {
+      this.log = logger;
+      if (existsSync(CACHEFILE)) {
+        try {
+          this.userCache = JSON.parse(readFileSync(CACHEFILE, "utf8"));
+          this.log.info(
+            `Read ${
+              Object.keys(this.userCache).length
+            } users from disk cache...`
+          );
+          this.getBotUserId().then((id) =>
+            this.log.info("botuser id", { meta: id })
+          );
+          return;
+        } catch (e) {
+          this.log.error("This was a non-fatal error loading the user cache", {
+            meta: e,
+          });
+          return this.fetchAndCacheUserList();
+        }
+      } else {
+        return this.fetchAndCacheUserList();
       }
-    } else {
-      this.ready = this.fetchAndCacheUserList();
-    }
+    });
+
     // Refresh user names every 24 hours
     const daily = 1000 * 60 * 60 * 24;
     setInterval(() => this.fetchAndCacheUserList(), daily);
@@ -61,7 +73,7 @@ export class UserNameLookupService {
 
   private async fetchAndCacheUserList() {
     // https://api.slack.com/methods/users.list
-    console.log("Fetching user list from Slack...");
+    this.log.info("Fetching user list from Slack...");
     const users = await getAll(this.slackWeb.users.list, {}, "members");
 
     this.userCache = users.reduce(
@@ -72,14 +84,15 @@ export class UserNameLookupService {
       {}
     );
 
-    console.log(`Fetched ${users?.length} from Slack via user.list`);
+    this.log.info(`Fetched ${users?.length} from Slack via user.list`);
     try {
       writeFileSync(CACHEFILE, JSON.stringify(this.userCache, null, 2));
-      console.log("Wrote user cache to disk");
+      this.log.info("Wrote user cache to disk");
     } catch (e) {
-      console.log(e);
-      console.log("This was an error writing the user cache to disk");
+      this.log.error("This was an error writing the user cache to disk", {
+        meta: e,
+      });
     }
-    this.getBotUserId().then((id) => console.log("botuser id", id));
+    this.getBotUserId().then((id) => this.log.info("botuser id", { meta: id }));
   }
 }

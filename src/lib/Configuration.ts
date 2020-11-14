@@ -19,16 +19,31 @@ const DBConfig = t.partial({
   url: t.string,
 });
 
+const LogLevelConfig = t.keyof({
+  error: null,
+  warn: null,
+  info: null,
+  http: null,
+  verbose: null,
+  debug: null,
+  silly: null,
+});
+
 export type SlackConfigObject = t.TypeOf<typeof SlackConfig>;
 export type DiscourseConfigObject = t.TypeOf<typeof DiscourseConfig>;
 export type DBConfigObject = t.TypeOf<typeof DBConfig>;
+export type LogConfigObject = {
+  level: t.TypeOf<typeof LogLevelConfig>;
+};
+
 export type Configuration = {
   slack: SlackConfigObject;
   discourse: DiscourseConfigObject;
   db: DBConfigObject;
+  log: LogConfigObject;
 };
 
-export async function getConfiguration() {
+export async function getConfiguration(): Promise<Configuration> {
   const db = await tPromise.decode(DBConfig)({
     url: process.env.COUCHDB_URL,
   });
@@ -46,9 +61,17 @@ export async function getConfiguration() {
     botname: process.env.SLACK_BOTNAME,
     port: process.env.SLACK_PORT || "3000",
   });
+
+  const log = {
+    level: await tPromise.decode(LogLevelConfig)(
+      process.env.LOG_LEVEL?.toUpperCase() || "info"
+    ),
+  };
+
   return {
     db,
     discourse,
     slack,
+    log,
   };
 }

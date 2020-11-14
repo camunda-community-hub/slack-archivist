@@ -95,6 +95,8 @@ SLACK_BOTNAME
 SLACK_PORT # Default: 3000
 
 COUCHDB_URL # For syncing
+
+LOG_LEVEL # winston log level. Default: info
 ```
 
 You can set these through your environment, or put them into a `.env` file.

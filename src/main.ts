@@ -14,22 +14,26 @@ import { helpText, noTitle, notThreadedMessage } from "./messages/help";
 import { createSuccessMessage } from "./messages/post-success";
 import { getDB } from "./DB";
 import { v4 as uuid } from "uuid";
+import { getLogger } from "./lib/Log";
+import chalk from "chalk";
 
 require("dotenv").config();
 
 async function main() {
   const configuration = await getConfiguration();
-  const db = getDB(configuration);
-  db.info().then((res) => console.log("Database info:", res));
+  const log = await getLogger();
+  console.log("\n");
+  log.info(chalk.greenBright("***** Starting the Slack Archivist bot *****\n"));
+  const db = await getDB(configuration);
   const discourseAPI = new DiscourseAPI(configuration.discourse);
   const { slackEvents, slackWeb } = getSlack(configuration.slack);
   const userlookup = new UserNameLookupService(slackWeb, configuration.slack);
 
   // Listens to all messages - I think...
   slackEvents.on("message", (event: SlackMessageEvent) => {
-    //   console.log(
-    //     `Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`
-    //   );
+    log.info(
+      `Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`
+    );
   });
 
   slackEvents.on("channel_joined", (event) => console.log(event));
@@ -154,8 +158,8 @@ async function main() {
     const discoursePost = await postBuilder.buildMarkdownPost();
 
     // tslint:disable-next-line: no-console
-    console.log("Title", title);
-    console.log("Post", discoursePost); // @DEBUG
+    log.info("Title", title);
+    log.info("Post", discoursePost); // @DEBUG
 
     const res = await discourseAPI.createNewPost(title, discoursePost);
     const discoursePostFailed = (e: Error) => {
@@ -192,7 +196,7 @@ async function main() {
   const address = server.address();
   const port = isAddressInfo(address) ? address.port : address;
 
-  console.log(`Listening for events on ${port}`);
+  log.info(`Listening for events on ${port}`);
 }
 
 function isAddressInfo(maybeAddressInfo): maybeAddressInfo is AddressInfo {
