@@ -85,6 +85,7 @@ async function main() {
     }
 
     if (!isThreadedMessage(event)) {
+      log.info("Is not a threaded message!");
       return slackWeb.chat.postEphemeral({
         user: event.user,
         channel: event.channel,
@@ -95,7 +96,7 @@ async function main() {
 
     const title = msg;
     if (title.length < 1) {
-      console.log("Threaded message - but no title!");
+      log.info("Threaded message - but no title!");
       return slackWeb.chat.postEphemeral({
         user: event.user,
         channel: event.channel,
@@ -103,7 +104,7 @@ async function main() {
         text: noTitle,
       });
     }
-    console.log("Threaded message - Creating Discourse Post");
+    log.info("Threaded message - Creating Discourse Post");
 
     const postBuilder = new PostBuilder({
       slackPromoMessage: promoText,
@@ -135,7 +136,7 @@ async function main() {
           text: `This is already archived at ${existingPostFromDb.docs[0].url}.`,
         });
       } else {
-        console.log(
+        log.info(
           `The database says this was already archived, but we can't find it in Discourse`
         );
         // Should we delete the database record?
@@ -161,7 +162,7 @@ async function main() {
           text: `This is already archived at ${existingUrlFromThread}.`,
         });
       } else {
-        console.log(
+        log.info(
           `There is a message in the thread saying this was already archived, but we can't find it in Discourse`
         );
       }
