@@ -70,9 +70,13 @@ async function main() {
   slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
     const isThreadedMessage = (event: SlackMessageEvent) => !!event.thread_ts;
     // Make sure the bot is in the channel
-    slackWeb.channels.join({
-      name: event.channel,
-    });
+    slackWeb.channels
+      .join({
+        name: event.channel,
+      })
+      .then((result) =>
+        log.info(`Join channel ${event.channel} result`, { meta: result })
+      );
     const msg = removeBotnameTag(event.text, await userlookup.getBotUserId());
 
     if (isCommand(msg)) {
