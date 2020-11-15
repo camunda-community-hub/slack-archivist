@@ -33,6 +33,15 @@ async function main() {
 
   // Listens to all messages - I think...
   slackEvents.on("message.channels", (event: SlackMessageEvent) => {
+    log.info("message.channels");
+    log.info(
+      `Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`
+    );
+  });
+
+  // Listens to all messages - I think...
+  slackEvents.on("message", (event: SlackMessageEvent) => {
+    log.info("message");
     log.info(
       `Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`
     );
