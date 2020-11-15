@@ -70,9 +70,9 @@ async function main() {
   slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
     const isThreadedMessage = (event: SlackMessageEvent) => !!event.thread_ts;
     // Make sure the bot is in the channel
-    slackWeb.channels
+    slackWeb.conversations
       .join({
-        name: event.channel,
+        channel: event.channel,
       })
       .then((result) =>
         log.info(`Join channel ${event.channel} result`, { meta: result })
