@@ -49,14 +49,22 @@ async function main() {
     );
   });
 
+  slackEvents.on("message.im", (event: SlackMessageEvent) => {
+    log.info("message.im");
+    log.info(
+      `Received a DM event: user ${event.user} in channel ${event.channel} says ${event.text}`
+    );
+  });
+
   slackEvents.on("channel_joined", (event) => console.log(event));
 
   // For when someone mentions the bot in a new channel
-  slackEvents.on("link_shared", (event: SlackMessageEvent) =>
+  slackEvents.on("link_shared", (event: SlackMessageEvent) => {
+    log.info(`Received link_shared event...`);
     slackWeb.channels.join({
       name: event.channel,
-    })
-  );
+    });
+  });
 
   // Greet new users with the help text in a DM
   slackEvents.on("team_join", (event) => {
