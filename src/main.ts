@@ -86,7 +86,7 @@ async function main() {
       })
       .then((result) =>
         log.info(`Join channel ${event.channel} response_metadata`, {
-          meta: result?.response_metadata,
+          meta: { ...result?.response_metadata, scopes: null },
         })
       );
     const msg = removeBotnameTag(event.text, await userlookup.getBotUserId());
