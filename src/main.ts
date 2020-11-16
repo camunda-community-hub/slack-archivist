@@ -1,3 +1,5 @@
+process.env.DEBUG = "@slack/events-api:*"; // @DEBUG
+
 import { AddressInfo } from "net";
 import { SlackMessageEvent } from "./lib/SlackMessage";
 import { getAll } from "./webapi-pagination";
@@ -18,8 +20,6 @@ import { getLogger } from "./lib/Log";
 import chalk from "chalk";
 
 require("dotenv").config();
-
-process.env.DEBUG = "@slack/events-api:*"; // @DEBUG
 
 async function main() {
   const configuration = await getConfiguration();
