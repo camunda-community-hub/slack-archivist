@@ -19,6 +19,8 @@ import chalk from "chalk";
 
 require("dotenv").config();
 
+process.env.DEBUG = "@slack/events-api:*"; // @DEBUG
+
 async function main() {
   const configuration = await getConfiguration();
   const log = await getLogger();
