@@ -85,7 +85,7 @@ async function main() {
         channel: event.channel,
       })
       .then((result) =>
-        log.info(`Join channel ${event.channel} result`, {
+        log.info(`Join channel ${event.channel} response_metadata`, {
           meta: result?.response_metadata,
         })
       );
