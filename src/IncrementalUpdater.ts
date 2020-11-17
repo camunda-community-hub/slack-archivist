@@ -1,8 +1,6 @@
 import { SlackMessageEvent } from "./lib/SlackMessage";
-import { UserNameLookupService } from "./UserNameLookupService";
 import { DiscourseAPI } from "./Discourse";
 import { PostBuilder } from "./PostBuilder";
-import { promoText } from "./messages/promo";
 import { getDB } from "./DB";
 import { getLogger } from "./lib/Log";
 import winston from "winston";
