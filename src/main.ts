@@ -1,4 +1,4 @@
-process.env.DEBUG = "@slack/events-api:*"; // @DEBUG
+// process.env.DEBUG = "@slack/events-api:*"; // @DEBUG
 
 import { AddressInfo } from "net";
 import { SlackMessageEvent } from "./lib/SlackMessage";
@@ -14,7 +14,7 @@ import { promoText } from "./messages/promo";
 import { fold } from "fp-ts/lib/Either";
 import { helpText, noTitle, notThreadedMessage } from "./messages/help";
 import { createSuccessMessage } from "./messages/post-success";
-import { getDB } from "./DB";
+import { ArchivedConversation, DocType, getDB } from "./DB";
 import { v4 as uuid } from "uuid";
 import { getLogger } from "./lib/Log";
 import chalk from "chalk";
@@ -33,27 +33,29 @@ async function main() {
   );
   const userlookup = new UserNameLookupService(slackWeb, configuration.slack);
 
-  // Listens to all messages - I think...
-  slackEvents.on("message.channels", (event: SlackMessageEvent) => {
-    log.info("message.channels");
-    log.info(
-      `Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`
-    );
-  });
-
-  // Listens to all messages - I think...
-  slackEvents.on("message", (event: SlackMessageEvent) => {
+  // Listens to all messages - **including app mentions**
+  slackEvents.on("message", async (event: SlackMessageEvent) => {
     log.info("message");
     log.info(
       `Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`
     );
-  });
-
-  slackEvents.on("message.im", (event: SlackMessageEvent) => {
-    log.info("message.im");
-    log.info(
-      `Received a DM event: user ${event.user} in channel ${event.channel} says ${event.text}`
-    );
+    // We need to bail here if it is an app_mention
+    const op = event.event_ts;
+    const isPartofArchivedThread =
+      (
+        await db.find({
+          selector: { op, type: DocType.ArchivedConversation },
+        })
+      ).docs.length > 0;
+    if (isPartofArchivedThread) {
+      db.post({
+        type: DocType.IncrementalUpdatePending,
+        _id: uuid(),
+        message: `${event.user} ${event.text}`,
+        op,
+        timestamp: JSON.stringify(new Date()),
+      });
+    }
   });
 
   slackEvents.on("channel_joined", (event) => console.log(event));
@@ -137,19 +139,18 @@ async function main() {
 
     const op = postBuilder.getOP();
     const existingPostFromDb = await db.find({
-      selector: { op: op.event_ts },
+      selector: { op: op.event_ts, type: DocType.ArchivedConversation },
     });
 
     if (existingPostFromDb.docs.length > 0) {
-      const existingPost = await discourseAPI.getPost(
-        existingPostFromDb.docs[0].url
-      );
+      const doc = existingPostFromDb.docs[0] as ArchivedConversation;
+      const existingPost = await discourseAPI.getPost(doc.url);
       if (existingPost) {
         return slackWeb.chat.postEphemeral({
           user: event.user,
           channel: event.channel,
           thread: event.thread_ts,
-          text: `This is already archived at ${existingPostFromDb.docs[0].url}.`,
+          text: `This is already archived at ${doc.url}.`,
         });
       } else {
         log.info(
@@ -207,6 +208,7 @@ async function main() {
       });
       db.put({
         _id: uuid(),
+        type: DocType.ArchivedConversation,
         op: op.event_ts,
         post: discoursePost,
         title,
@@ -232,3 +234,10 @@ function isAddressInfo(maybeAddressInfo): maybeAddressInfo is AddressInfo {
 }
 
 main();
+
+const incrementalUpdater = setInterval(() => {
+  // select all pending updates from the database
+  // For each
+  // process it into Discourse
+  // add the record to Pouch / remove the pending record
+}, 20 * 1000);

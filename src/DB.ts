@@ -6,8 +6,15 @@ import { getLogger } from "./lib/Log";
 
 PouchDB.plugin(require("pouchdb-find"));
 
-interface ArchivedConversation {
+export enum DocType {
+  ArchivedConversation,
+  IncrementalUpdate,
+  IncrementalUpdatePending,
+}
+
+export interface ArchivedConversation {
   _id: string;
+  type: DocType.ArchivedConversation;
   op: string;
   post: string;
   title: string;
@@ -17,7 +24,17 @@ interface ArchivedConversation {
   topic_id: string;
 }
 
-let db: PouchDB.Database<ArchivedConversation> | undefined;
+interface IncrementalUpdatePending {
+  _id: string;
+  type: DocType.IncrementalUpdatePending;
+  op: string;
+  message: string;
+  timestamp: string;
+}
+
+let db:
+  | PouchDB.Database<ArchivedConversation | IncrementalUpdatePending>
+  | undefined;
 
 export async function getDB(conf: Configuration) {
   if (db) {
