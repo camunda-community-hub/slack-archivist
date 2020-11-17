@@ -49,7 +49,8 @@ export class IncrementalUpdater {
       const updates = await this.db.getPendingIncrementalUpdates();
 
       this.log.info(`Found ${updates.docs.length} updates...`);
-      updates.docs.forEach((doc) => {
+      // we need to order them by timestamp
+      updates.docs.forEach(async (doc) => {
         const { thread_ts } = doc;
         const text = this.postBuilder.replaceUsercodesWithNames([
           {
@@ -60,10 +61,11 @@ export class IncrementalUpdater {
 
         console.log("text", text);
         console.log("doc", doc);
+        // process it into Discourse
+        // add the record to Pouch / remove the pending record
+        await this.db.completePendingIncrementalUpdate(doc);
       });
 
-      // process it into Discourse
-      // add the record to Pouch / remove the pending record
       this.isRunning = false;
     }, this.periodMs);
   }
