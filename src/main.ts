@@ -21,6 +21,13 @@ import { IncrementalUpdater } from "./IncrementalUpdater";
 
 require("dotenv").config();
 
+process.on("uncaughtException", (err) => {
+  console.log("err", err);
+});
+process.on("unhandledRejection", (err) => {
+  console.log("err", err);
+});
+
 async function main() {
   const configuration = await getConfiguration();
   const log = await getLogger();
