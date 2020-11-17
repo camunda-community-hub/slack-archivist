@@ -16,10 +16,10 @@ export type DB = PouchDB.Database<
 >;
 
 export enum DocType {
-  ArchivedConversation,
-  IncrementalUpdate,
-  IncrementalUpdatePending,
-  IncrementalUpdatePostDeleted,
+  ArchivedConversation = "ArchivedConversation",
+  IncrementalUpdate = "IncrementalUpdate",
+  IncrementalUpdatePending = "IncrementalUpdatePending",
+  IncrementalUpdatePostDeleted = "IncrementalUpdatePostDeleted",
 }
 
 interface NewArchivedConversation {
@@ -163,8 +163,10 @@ class DBWrapper {
     const _id = this.getArchivedConversationId(doc.thread_ts);
     // delete any existing document
     // this will happen if we delete a post in Discourse, then re-archive the thread
-    const old = await this.db.get(_id);
-    await this.db.remove(old).catch((e) => `Not removing`);
+    await this.db
+      .get(_id)
+      .then((old) => this.db.remove(old))
+      .catch((e) => `No existing record`);
     return this.db.put({
       type,
       _id: this.getArchivedConversationId(doc.thread_ts),

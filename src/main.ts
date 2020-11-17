@@ -205,8 +205,8 @@ async function main() {
     }
     const discoursePost = await postBuilder.buildMarkdownPost();
 
-    log.info("Title", title); // @DEBUG
-    log.info("Post", discoursePost); // @DEBUG
+    log.info("Title", { meta: title }); // @DEBUG
+    log.info("Post", { meta: discoursePost }); // @DEBUG
 
     const res = await discourseAPI.createNewPost(title, discoursePost);
     const discoursePostFailed = (e: Error) => {
