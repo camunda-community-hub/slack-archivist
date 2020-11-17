@@ -51,6 +51,10 @@ async function main() {
     log.info(
       `Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`
     );
+    // Ignore the bot's own posts
+    if (event.user === (await userlookup.getBotUserId())) {
+      return;
+    }
     // We need to bail here if it is an app_mention
     const { thread_ts } = event;
     if (!thread_ts) {

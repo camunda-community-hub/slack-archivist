@@ -15,6 +15,7 @@ export class UserNameLookupService {
   userCache: UserCache;
   ready: Promise<void>;
   botname: string;
+  private botId!: string;
   log!: winston.Logger;
   constructor(slackWeb: WebClient, slackConfig: SlackConfigObject) {
     this.slackWeb = slackWeb;
@@ -30,9 +31,9 @@ export class UserNameLookupService {
               Object.keys(this.userCache).length
             } users from disk cache...`
           );
-          this.getBotUserId().then((id) =>
-            this.log.info("botuser id", { meta: id })
-          );
+          this.getBotUserId().then((id) => {
+            this.log.info("botuser id", { meta: id });
+          });
           return;
         } catch (e) {
           this.log.error("This was a non-fatal error loading the user cache", {
@@ -63,12 +64,18 @@ export class UserNameLookupService {
     return this.userCache;
   }
 
-  async getBotUserId() {
+  async getBotUserId(): Promise<string> {
     await this.ready;
-    const userId = Object.keys(this.userCache).filter(
-      (usercode) => this.userCache[usercode] === this.botname
+    return (
+      this.botId ||
+      new Promise((res) => {
+        const userId = Object.keys(this.userCache).filter(
+          (usercode) => this.userCache[usercode] === this.botname
+        );
+        this.botId = userId[0];
+        res(userId[0]);
+      })
     );
-    return userId[0];
   }
 
   private async fetchAndCacheUserList() {

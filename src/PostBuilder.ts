@@ -26,6 +26,8 @@ export class PostBuilder {
     // Remove the last message, because it is the call to the bot
     messages.pop();
     this.messages = messages;
+
+    console.log("messages", messages); //@DEBUG
   }
 
   /**
