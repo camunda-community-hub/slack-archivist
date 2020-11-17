@@ -14,7 +14,7 @@ import { promoText } from "./messages/promo";
 import { fold } from "fp-ts/lib/Either";
 import { helpText, noTitle, notThreadedMessage } from "./messages/help";
 import { createSuccessMessage } from "./messages/post-success";
-import { ArchivedConversation, getDB } from "./DB";
+import { getDB } from "./DB";
 import { getLogger } from "./lib/Log";
 import chalk from "chalk";
 import { IncrementalUpdater } from "./IncrementalUpdater";
@@ -60,15 +60,13 @@ async function main() {
     if (!thread_ts) {
       return;
     }
-    const archivedThread = (await db.getArchivedConversation(thread_ts))
-      ?.docs?.[0];
+    const archivedThread = await db.getArchivedConversation(thread_ts);
     if (archivedThread) {
       // We use a transactional outbox pattern to avoid losing anything if Discourse is 404
       db.savePendingIncrementalUpdate({
         message: `${event.user} ${event.text}`,
         user: event.user,
         thread_ts,
-        parent: archivedThread._id,
         event_ts: event.event_ts,
       });
     }
@@ -157,10 +155,10 @@ async function main() {
 
     const existingPostFromDb = await db.getArchivedConversation(thread_ts);
 
-    if (existingPostFromDb.docs.length > 0) {
-      const doc = existingPostFromDb.docs[0] as ArchivedConversation;
+    if (existingPostFromDb) {
+      const doc = existingPostFromDb;
       const existingPost = await discourseAPI.getPost(doc.url);
-      if (existingPost) {
+      if (existingPost && existingPost.status === 200) {
         return slackWeb.chat.postEphemeral({
           user: event.user,
           channel: event.channel,

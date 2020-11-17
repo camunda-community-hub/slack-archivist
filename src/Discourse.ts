@@ -10,7 +10,7 @@ export interface DiscourseSuccessMessage {
   url: string;
   baseURL: string;
   topic_slug: string;
-  topic_id: string;
+  topic_id: number;
 }
 
 export class DiscourseAPI {
@@ -33,6 +33,32 @@ export class DiscourseAPI {
       },
     });
     this.limit = new RateLimiter(500);
+  }
+
+  async addToPost(
+    topic_id: number,
+    raw: string
+  ): Promise<E.Either<Error, DiscourseSuccessMessage>> {
+    return this.limit.runRateLimited({
+      task: () =>
+        this.http
+          .post("/posts.json", {
+            topic_id,
+            raw: raw,
+            category: this.config.category,
+          })
+          .then(({ data }) =>
+            E.right({
+              url: `${this.config.url}t/${data.topic_slug}/${data.topic_id}`,
+              baseURL: this.config.url,
+              topic_slug: data.topic_slug,
+              topic_id: data.topic_id,
+            })
+          )
+          .catch((e) =>
+            E.left(new Error(e?.response?.data?.errors || e.message))
+          ),
+    });
   }
 
   async createNewPost(
@@ -68,7 +94,7 @@ export class DiscourseAPI {
       const res = await this.limit.runRateLimited({
         task: () => this.http.get(`/posts/${id}.json`),
       });
-      return res.data;
+      return res;
     } catch (e) {
       return false;
     }

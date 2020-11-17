@@ -9,13 +9,17 @@ const pouchCollate = require("pouchdb-collate");
 PouchDB.plugin(require("pouchdb-find"));
 
 export type DB = PouchDB.Database<
-  ArchivedConversation | IncrementalUpdatePending | IncrementalUpdate
+  | ArchivedConversation
+  | IncrementalUpdatePending
+  | IncrementalUpdate
+  | IncrementalUpdatePostDeleted
 >;
 
 export enum DocType {
   ArchivedConversation,
   IncrementalUpdate,
   IncrementalUpdatePending,
+  IncrementalUpdatePostDeleted,
 }
 
 interface NewArchivedConversation {
@@ -25,7 +29,7 @@ interface NewArchivedConversation {
   url: string;
   baseUrl: string;
   topic_slug: string;
-  topic_id: string;
+  topic_id: number;
 }
 
 export interface ArchivedConversation extends NewArchivedConversation {
@@ -36,7 +40,6 @@ export interface ArchivedConversation extends NewArchivedConversation {
 interface NewIncrementalUpdatePending {
   thread_ts: string;
   message: string;
-  parent: string;
   user: string;
 }
 
@@ -49,6 +52,13 @@ export interface IncrementalUpdatePending extends NewIncrementalUpdatePending {
 export interface IncrementalUpdate extends NewIncrementalUpdatePending {
   _id: string;
   type: DocType.IncrementalUpdate;
+  archivedAt: string;
+}
+
+export interface IncrementalUpdatePostDeleted
+  extends NewIncrementalUpdatePending {
+  _id: string;
+  type: DocType.IncrementalUpdatePostDeleted;
   archivedAt: string;
 }
 
@@ -132,6 +142,14 @@ class DBWrapper {
     }) as Promise<PouchDB.Find.FindResponse<IncrementalUpdatePending>>;
   }
 
+  discardPendingIncrementalUpdate(doc: IncrementalUpdatePending) {
+    return this.db.put({
+      ...doc,
+      archivedAt: JSON.stringify(new Date()),
+      type: DocType.IncrementalUpdatePostDeleted,
+    });
+  }
+
   completePendingIncrementalUpdate(doc: IncrementalUpdatePending) {
     return this.db.put({
       ...doc,
@@ -142,25 +160,30 @@ class DBWrapper {
 
   async saveArchivedConversation(doc: NewArchivedConversation) {
     const type = DocType.ArchivedConversation;
-    const _id = pouchCollate.toIndexableString([type, doc.thread_ts]);
+    const _id = this.getArchivedConversationId(doc.thread_ts);
     // delete any existing document
     // this will happen if we delete a post in Discourse, then re-archive the thread
-    try {
-      const old = await this.db.get(_id);
-      await this.db.remove(old);
-    } catch (e) {
-      this.log.error("Error removing existing doc", { meta: e });
-    }
+    const old = await this.db.get(_id);
+    await this.db.remove(old).catch((e) => `Not removing`);
     return this.db.put({
       type,
-      _id: pouchCollate.toIndexableString([type, doc.thread_ts]),
+      _id: this.getArchivedConversationId(doc.thread_ts),
       ...doc,
     });
   }
 
   getArchivedConversation(thread_ts: string) {
-    return this.db.find({
-      selector: { thread_ts, type: DocType.ArchivedConversation },
-    });
+    const _id = this.getArchivedConversationId(thread_ts);
+    return this.db
+      .get(_id)
+      .then((docs) => docs[0] as ArchivedConversation)
+      .catch((e) => null);
+  }
+
+  private getArchivedConversationId(thread_ts: string) {
+    return pouchCollate.toIndexableString([
+      DocType.ArchivedConversation,
+      thread_ts,
+    ]);
   }
 }

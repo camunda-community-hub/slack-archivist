@@ -1,9 +1,10 @@
 import { SlackMessageEvent } from "./lib/SlackMessage";
-import { DiscourseAPI } from "./Discourse";
+import { DiscourseAPI, DiscourseSuccessMessage } from "./Discourse";
 import { PostBuilder } from "./PostBuilder";
 import { getDB } from "./DB";
 import { getLogger } from "./lib/Log";
 import winston from "winston";
+import { fold } from "fp-ts/lib/Either";
 
 type Await<T> = T extends Promise<infer U> ? U : T;
 
@@ -41,7 +42,6 @@ export class IncrementalUpdater {
         this.log.info("Incremental update already running. Bailing..."); // @DEBUG
         return;
       }
-      this.log.info("Running incremental update"); // @DEBUG
 
       this.isRunning = true;
       const updates = await this.db.getPendingIncrementalUpdates();
@@ -50,18 +50,50 @@ export class IncrementalUpdater {
       // we need to order them by timestamp
       updates.docs.forEach(async (doc) => {
         const { thread_ts } = doc;
-        const text = this.postBuilder.replaceUsercodesWithNames([
+        const [scrubbed] = this.postBuilder.replaceUsercodesWithNames([
           {
             text: doc.message,
             user: doc.user,
           },
         ] as SlackMessageEvent[]);
 
+        const text = `**${scrubbed.user}**: ${scrubbed.text}`;
+
         console.log("text", text);
         console.log("doc", doc);
+        const existingPostFromDb = await this.db.getArchivedConversation(
+          thread_ts
+        );
+
+        if (!existingPostFromDb) {
+          return this.db.discardPendingIncrementalUpdate(doc);
+        }
+
+        const postFromDiscourse =
+          existingPostFromDb &&
+          (await this.discourseAPI.getPost(existingPostFromDb.url));
+
+        // Post was deleted
+        if (postFromDiscourse && postFromDiscourse.status === 404) {
+          return this.db.discardPendingIncrementalUpdate(doc);
+        }
+
         // process it into Discourse
-        // add the record to Pouch / remove the pending record
-        await this.db.completePendingIncrementalUpdate(doc);
+        const res = await this.discourseAPI.addToPost(
+          existingPostFromDb.topic_id,
+          text
+        );
+        const discoursePostSucceeded = async (res: DiscourseSuccessMessage) => {
+          // add the record to Pouch / remove the pending record
+          await this.db.completePendingIncrementalUpdate({
+            ...doc,
+            ...res,
+          });
+        };
+        const discoursePostFailed = (e: Error) => {
+          this.log.error("Error posting to Discourse", { meta: e });
+        };
+        fold(discoursePostFailed, discoursePostSucceeded)(res);
       });
 
       this.isRunning = false;
