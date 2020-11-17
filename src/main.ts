@@ -14,10 +14,10 @@ import { promoText } from "./messages/promo";
 import { fold } from "fp-ts/lib/Either";
 import { helpText, noTitle, notThreadedMessage } from "./messages/help";
 import { createSuccessMessage } from "./messages/post-success";
-import { ArchivedConversation, DocType, getDB } from "./DB";
-import { v4 as uuid } from "uuid";
+import { ArchivedConversation, getDB } from "./DB";
 import { getLogger } from "./lib/Log";
 import chalk from "chalk";
+import { IncrementalUpdater } from "./IncrementalUpdater";
 
 require("dotenv").config();
 
@@ -33,6 +33,18 @@ async function main() {
   );
   const userlookup = new UserNameLookupService(slackWeb, configuration.slack);
 
+  const incrementalUpdater = new IncrementalUpdater({
+    db,
+    discourseAPI: discourseAPI,
+    postBuilder: new PostBuilder({
+      slackPromoMessage: promoText,
+      userMap: await userlookup.getUsernameDictionary(),
+      messages: [],
+    }),
+  });
+
+  incrementalUpdater.start();
+
   // Listens to all messages - **including app mentions**
   slackEvents.on("message", async (event: SlackMessageEvent) => {
     log.info("message");
@@ -40,20 +52,20 @@ async function main() {
       `Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`
     );
     // We need to bail here if it is an app_mention
-    const op = event.event_ts;
-    const isPartofArchivedThread =
-      (
-        await db.find({
-          selector: { op, type: DocType.ArchivedConversation },
-        })
-      ).docs.length > 0;
-    if (isPartofArchivedThread) {
-      db.post({
-        type: DocType.IncrementalUpdatePending,
-        _id: uuid(),
+    const { thread_ts } = event;
+    if (!thread_ts) {
+      return;
+    }
+    const archivedThread = (await db.getArchivedConversation(thread_ts))
+      ?.docs?.[0];
+    if (archivedThread) {
+      // We use a transactional outbox pattern to avoid losing anything if Discourse is 404
+      db.savePendingIncrementalUpdate({
         message: `${event.user} ${event.text}`,
-        op,
-        timestamp: JSON.stringify(new Date()),
+        user: event.user,
+        thread_ts,
+        parent: archivedThread._id,
+        event_ts: event.event_ts,
       });
     }
   });
@@ -102,7 +114,9 @@ async function main() {
       });
     }
 
-    if (!isThreadedMessage(event)) {
+    const thread_ts = event.thread_ts;
+
+    if (!thread_ts) {
       log.info("Is not a threaded message!");
       return slackWeb.chat.postEphemeral({
         user: event.user,
@@ -131,16 +145,13 @@ async function main() {
         slackWeb.conversations.replies,
         {
           channel: event.channel,
-          ts: event.thread_ts!,
+          ts: thread_ts,
         },
         "messages"
       ),
     });
 
-    const op = postBuilder.getOP();
-    const existingPostFromDb = await db.find({
-      selector: { op: op.event_ts, type: DocType.ArchivedConversation },
-    });
+    const existingPostFromDb = await db.getArchivedConversation(thread_ts);
 
     if (existingPostFromDb.docs.length > 0) {
       const doc = existingPostFromDb.docs[0] as ArchivedConversation;
@@ -149,14 +160,13 @@ async function main() {
         return slackWeb.chat.postEphemeral({
           user: event.user,
           channel: event.channel,
-          thread: event.thread_ts,
+          thread: thread_ts,
           text: `This is already archived at ${doc.url}.`,
         });
       } else {
         log.info(
           `The database says this was already archived, but we can't find it in Discourse`
         );
-        // Should we delete the database record?
       }
     }
 
@@ -175,7 +185,7 @@ async function main() {
         return slackWeb.chat.postEphemeral({
           user: event.user,
           channel: event.channel,
-          thread: event.thread_ts,
+          thread: thread_ts,
           text: `This is already archived at ${existingUrlFromThread}.`,
         });
       } else {
@@ -186,8 +196,7 @@ async function main() {
     }
     const discoursePost = await postBuilder.buildMarkdownPost();
 
-    // tslint:disable-next-line: no-console
-    log.info("Title", title);
+    log.info("Title", title); // @DEBUG
     log.info("Post", discoursePost); // @DEBUG
 
     const res = await discourseAPI.createNewPost(title, discoursePost);
@@ -203,13 +212,11 @@ async function main() {
     const discoursePostSucceeded = (res: DiscourseSuccessMessage) => {
       slackWeb.chat.postMessage({
         channel: event.channel,
-        thread_ts: event.thread_ts,
+        thread_ts: thread_ts,
         text: createSuccessMessage(res.url),
       });
-      db.put({
-        _id: uuid(),
-        type: DocType.ArchivedConversation,
-        op: op.event_ts,
+      db.saveArchivedConversation({
+        thread_ts,
         post: discoursePost,
         title,
         url: res.url,
@@ -234,10 +241,3 @@ function isAddressInfo(maybeAddressInfo): maybeAddressInfo is AddressInfo {
 }
 
 main();
-
-const incrementalUpdater = setInterval(() => {
-  // select all pending updates from the database
-  // For each
-  // process it into Discourse
-  // add the record to Pouch / remove the pending record
-}, 20 * 1000);
