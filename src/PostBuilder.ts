@@ -16,17 +16,19 @@ export class PostBuilder {
     userMap,
     slackPromoMessage,
     messages,
+    botId,
   }: {
     slackPromoMessage?: string;
     userMap: UserCache;
     messages: SlackMessageEvent[];
+    botId: string;
   }) {
     this.slackPromoMessage = slackPromoMessage;
     this.userMap = userMap;
     // Remove the last message, because it is the call to the bot
     messages.pop();
-    this.messages = messages;
-
+    // Remove any previous messages from the bot
+    this.messages = messages.filter((msg) => msg.user !== botId);
     console.log("messages", messages); //@DEBUG
   }
 

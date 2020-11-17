@@ -47,6 +47,7 @@ async function main() {
       slackPromoMessage: promoText,
       userMap: await userlookup.getUsernameDictionary(),
       messages: [],
+      botId: await userlookup.getBotUserId(),
     }),
   });
 
@@ -158,6 +159,7 @@ async function main() {
         },
         "messages"
       ),
+      botId: await userlookup.getBotUserId(),
     });
 
     const existingPostFromDb = await db.getArchivedConversation(thread_ts);

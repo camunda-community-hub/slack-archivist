@@ -46,10 +46,11 @@ export class IncrementalUpdater {
       this.isRunning = true;
       const updates = await this.db.getPendingIncrementalUpdates();
 
-      this.log.info(`Found ${updates.docs.length} updates...`);
+      if (updates.docs.length > 0) {
+        this.log.info(`Found ${updates.docs.length} updates...`);
+      }
       // we need to order them by timestamp
       updates.docs.forEach(async (doc) => {
-        const { thread_ts } = doc;
         const [scrubbed] = this.postBuilder.replaceUsercodesWithNames([
           {
             text: doc.message,
@@ -62,7 +63,7 @@ export class IncrementalUpdater {
         console.log("text", text);
         console.log("doc", doc);
         const existingPostFromDb = await this.db.getArchivedConversation(
-          thread_ts
+          doc.thread_ts
         );
 
         if (!existingPostFromDb) {
