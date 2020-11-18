@@ -90,7 +90,7 @@ export class DiscourseAPI {
   }
 
   async getPost(topic_id: number) {
-    const req = `/posts/${topic_id}.json`;
+    const req = `/t/${topic_id}.json`;
     debug(`Request url: ${req}`);
     return this.limit
       .runRateLimited({

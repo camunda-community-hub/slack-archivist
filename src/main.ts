@@ -231,6 +231,7 @@ async function main() {
         topic_slug: res.topic_slug,
         topic_id: res.topic_id,
       });
+      log.info("Created post in Discourse: %O", res);
     };
     fold(discoursePostFailed, discoursePostSucceeded)(res);
   });
