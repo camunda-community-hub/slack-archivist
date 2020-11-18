@@ -58,9 +58,9 @@ async function main() {
   slackEvents.on("message", async (event: SlackMessageEvent) => {
     log.info("message");
     log.info(
-      `Received a message event: user ${userlookup.getUserName(
+      `Received a message event: user ${await userlookup.getUserName(
         event.user
-      )} in channel #${userlookup.getChannelName(event.channel)} says ${
+      )} in channel #${await userlookup.getChannelName(event.channel)} says ${
         event.text
       }`
     );
