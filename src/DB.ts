@@ -193,6 +193,7 @@ class DBWrapper {
     return this.db
       .get(_id)
       .then((docs) => {
+        debug(docs);
         const res = docs[0] as ArchivedConversation;
         debug(res);
         return res;
