@@ -77,10 +77,8 @@ export class IncrementalUpdater {
           (await this.discourseAPI.getPost(existingPostFromDb.topic_id));
 
         // Post was deleted
-        if (
-          !postFromDiscourse ||
-          (postFromDiscourse && postFromDiscourse.status === 404)
-        ) {
+        if (postFromDiscourse && postFromDiscourse.status === 404) {
+          this.log.info("Post was deleted in Discourse - discarding update.");
           return this.db.discardPendingIncrementalUpdate(doc);
         }
 

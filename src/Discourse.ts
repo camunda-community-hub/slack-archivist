@@ -98,6 +98,9 @@ export class DiscourseAPI {
       })
       .catch((e) => {
         debug(e);
+        if (e.response?.status) {
+          return { status: 400 };
+        }
         return false as false;
       });
   }
