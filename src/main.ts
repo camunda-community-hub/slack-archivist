@@ -81,6 +81,7 @@ async function main() {
         thread_ts,
         event_ts: event.event_ts,
       });
+      log.info(`Scheduled for incremental update`);
     }
   });
 
