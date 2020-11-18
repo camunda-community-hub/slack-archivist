@@ -23,7 +23,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "tsc"
+      "precommit": "tsc"
     }
   },
   "homepage": "https://github.com/jwulf/slack-archivist#readme",
