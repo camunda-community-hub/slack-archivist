@@ -19,6 +19,8 @@ import { getLogger } from "./lib/Log";
 import chalk from "chalk";
 import { IncrementalUpdater } from "./IncrementalUpdater";
 
+const debug = require("debug")("main");
+
 require("dotenv").config();
 
 process.on("uncaughtException", (err) => {
@@ -68,20 +70,29 @@ async function main() {
 
     const isPostByBot = event.user === botId;
     const isPostToBot = event.text.includes(`<@${botId}>`);
+    const isNotAReply = !thread_ts;
     if (isPostByBot || isPostToBot || !thread_ts) {
+      debug(
+        `Bailing: ${JSON.stringify(
+          { isPostByBot, isPostToBot, isNotAReply },
+          null,
+          2
+        )}`
+      );
       return;
     }
 
     const archivedThread = await db.getArchivedConversation(thread_ts);
     if (archivedThread) {
       // We use a transactional outbox pattern to avoid losing anything if Discourse is 404
-      db.savePendingIncrementalUpdate({
+      const res = await db.savePendingIncrementalUpdate({
         message: `${event.user} ${event.text}`,
         user: event.user,
         thread_ts,
         event_ts: event.event_ts,
       });
       log.info(`Scheduled for incremental update`);
+      debug(JSON.stringify(res, null, 2));
     }
   });
 

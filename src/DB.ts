@@ -121,6 +121,9 @@ class DBWrapper {
         //   .then((res) => console.log(JSON.stringify(res, null, 2))); // @DEBUG
       }
       this.db.info().then((res) => log.info("Database info:", { meta: res }));
+      this.db
+        .allDocs()
+        .then((docs) => console.log("allDocs", JSON.stringify(docs, null, 2))); // @DEBUG
     });
   }
 

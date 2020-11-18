@@ -6,6 +6,8 @@ import { getLogger } from "./lib/Log";
 import winston from "winston";
 import { fold } from "fp-ts/lib/Either";
 
+const debug = require("debug")("updates");
+
 type Await<T> = T extends Promise<infer U> ? U : T;
 
 export class IncrementalUpdater {
@@ -45,7 +47,7 @@ export class IncrementalUpdater {
 
       this.isRunning = true;
       const updates = await this.db.getPendingIncrementalUpdates();
-
+      debug(JSON.stringify(updates, null, 2));
       if (updates.docs.length > 0) {
         this.log.info(`Found ${updates.docs.length} updates...`);
       }
