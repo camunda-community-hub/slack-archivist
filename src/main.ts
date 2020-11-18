@@ -40,6 +40,7 @@ async function main() {
   );
   const userlookup = new UserNameLookupService(slackWeb, configuration.slack);
 
+  const botId = await userlookup.getBotUserId();
   const incrementalUpdater = new IncrementalUpdater({
     db,
     discourseAPI: discourseAPI,
@@ -57,10 +58,14 @@ async function main() {
   slackEvents.on("message", async (event: SlackMessageEvent) => {
     log.info("message");
     log.info(
-      `Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`
+      `Received a message event: user ${userlookup.getUserName(
+        event.user
+      )} in channel #${userlookup.getChannelName(event.channel)} says ${
+        event.text
+      }`
     );
     // Ignore the bot's own posts
-    if (event.user === (await userlookup.getBotUserId())) {
+    if (event.user === botId) {
       return;
     }
     // We need to bail here if it is an app_mention
@@ -91,13 +96,16 @@ async function main() {
   });
 
   // Greet new users with the help text in a DM
-  slackEvents.on("team_join", (event) => {
+  slackEvents.on("team_join", async (event) => {
     const { user } = event;
     slackWeb.chat.postMessage({
       channel: user,
       as_user: true,
       text: helpText,
     });
+    log.info(
+      `Sent intro DM to ${(await userlookup.getUsernameDictionary())[user]}...`
+    );
   });
 
   /** Archive a thread */

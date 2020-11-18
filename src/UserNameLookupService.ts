@@ -7,12 +7,15 @@ import winston from "winston";
 
 const CACHEFILE = "./user-cache.json";
 type Username = string;
+type Channelname = string;
 export type UserCache = { [usercode: string]: Username };
+export type ChannelCache = { [channelcode: string]: Channelname };
 
 // Caches the user list for 24 hours for performance and to avoid rate-limiting
 export class UserNameLookupService {
   slackWeb: WebClient;
   userCache: UserCache;
+  channelCache: ChannelCache;
   ready: Promise<void>;
   botname: string;
   private botId!: string;
@@ -20,6 +23,7 @@ export class UserNameLookupService {
   constructor(slackWeb: WebClient, slackConfig: SlackConfigObject) {
     this.slackWeb = slackWeb;
     this.userCache = {};
+    this.channelCache = {};
     this.botname = slackConfig.botname;
     this.ready = getLogger("Slack Users").then((logger) => {
       this.log = logger;
@@ -49,6 +53,27 @@ export class UserNameLookupService {
     // Refresh user names every 24 hours
     const daily = 1000 * 60 * 60 * 24;
     setInterval(() => this.fetchAndCacheUserList(), daily);
+  }
+
+  async getChannelName(channelCode: string) {
+    if (!this.channelCache[channelCode]) {
+      const res = await this.slackWeb.conversations.list().catch((e) => {
+        this.log.error("Slack Conversations list Error", { meta: e });
+        return { ok: false, channels: [] };
+      });
+      if (res.ok && res.channels) {
+        this.channelCache = (res.channels as any[]).reduce(
+          (prev, current) => ({ ...prev, [current.id]: current.name }),
+          {}
+        );
+      }
+    }
+    return this.channelCache[channelCode];
+  }
+
+  async getUserName(usercode: string) {
+    await this.ready;
+    return this.userCache[usercode];
   }
 
   async getUsernames(userCodes: string[]) {
