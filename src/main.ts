@@ -69,7 +69,7 @@ async function main() {
     const { thread_ts } = event;
 
     const isPostByBot = event.user === botId;
-    const isPostToBot = event.text.includes(`<@${botId}>`);
+    const isPostToBot = event.text?.includes(`<@${botId}>`);
     const isNotAReply = !thread_ts;
     if (isPostByBot || isPostToBot || !thread_ts) {
       debug(
@@ -86,7 +86,7 @@ async function main() {
     if (archivedThread) {
       // We use a transactional outbox pattern to avoid losing anything if Discourse is 404
       const res = await db.savePendingIncrementalUpdate({
-        message: `${event.user} ${event.text}`,
+        message: event.text,
         user: event.user,
         thread_ts,
         event_ts: event.event_ts,
@@ -233,6 +233,7 @@ async function main() {
     const discoursePostFailed = (e: Error) => {
       slackWeb.chat.postEphemeral({
         user: event.user,
+        thread_ts: event.thread_ts,
         channel: event.channel,
         text: `Sorry! I couldn't archive that. Discourse responded with: ${JSON.stringify(
           e.message

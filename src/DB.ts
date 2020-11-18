@@ -196,7 +196,7 @@ class DBWrapper {
       .get(_id)
       .then((res) => res as ArchivedConversation)
       .catch((e) => {
-        debug(e);
+        debug(`Response: ${e}`);
         return null;
       });
   }

@@ -31,7 +31,7 @@ export class PostBuilder {
     messages?.pop();
     // Remove any previous messages from the bot
     this.messages = messages?.filter((msg) => msg.user !== botId) || [];
-    debug(JSON.stringify(messages, null, 2));
+    debug("Input messages: $O" + JSON.stringify(messages, null, 2));
   }
 
   /**
@@ -88,25 +88,28 @@ export class PostBuilder {
   }
 
   threadMessages(messages: SlackMessageEvent[]) {
-    const messageIsThreadParent = (event: SlackMessageEvent) =>
-      event.thread_ts === event.ts;
+    // Somehow it looks like the thread is now threaded already
+    return messages;
 
-    const threadParentMessage = messages.filter(messageIsThreadParent)[0];
+    // const messageIsThreadParent = (event: SlackMessageEvent) =>
+    //   event.thread_ts === event.ts;
 
-    // Reorder the message according to the threading metadata. They are not ordered in the array.
-    const orderedRepliesIndex =
-      threadParentMessage.replies?.map((reply) => reply.ts) || []; // Allows a single post to be archived by calling the bot in the first thread message
-    const messageThread = [threadParentMessage];
-    orderedRepliesIndex.forEach((replyts) => {
-      const reply = messages.filter((msg) => msg.ts == replyts);
-      if (reply.length === 1) {
-        messageThread.push(reply[0]);
-      }
-    });
-    debug("messageThread:");
-    debug(messageThread);
+    // const threadParentMessage = messages.filter(messageIsThreadParent)[0];
 
-    return messageThread;
+    // // Reorder the message according to the threading metadata. They are not ordered in the array.
+    // const orderedRepliesIndex =
+    //   threadParentMessage.replies?.map((reply) => reply.ts) || []; // Allows a single post to be archived by calling the bot in the first thread message
+    // const messageThread = [threadParentMessage];
+    // orderedRepliesIndex.forEach((replyts) => {
+    //   const reply = messages.filter((msg) => msg.ts == replyts);
+    //   if (reply.length === 1) {
+    //     messageThread.push(reply[0]);
+    //   }
+    // });
+    // debug("messageThread:");
+    // debug(messageThread);
+
+    // return messageThread;
   }
 
   replaceUsercodesWithNames(

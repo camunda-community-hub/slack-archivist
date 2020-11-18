@@ -6,6 +6,8 @@ import * as E from "fp-ts/Either";
 import { DiscourseConfigObject } from "./lib/Configuration";
 import { RateLimiter } from "./lib/Ratelimiter";
 
+const debug = require("debug")("discourse");
+
 export interface DiscourseSuccessMessage {
   url: string;
   baseURL: string;
@@ -88,14 +90,18 @@ export class DiscourseAPI {
   }
 
   async getPost(url: string) {
+    debug(url);
     const ids = url.substr(url.indexOf("t/"));
     const id = ids.substr(ids.indexOf("/") + 1);
+    const req = `/posts/${id}.json`;
+    debug(`Request url: ${req}`);
     try {
       const res = await this.limit.runRateLimited({
-        task: () => this.http.get(`/posts/${id}.json`),
+        task: () => this.http.get(req),
       });
       return res;
     } catch (e) {
+      debug(e);
       return false;
     }
   }

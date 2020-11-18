@@ -41,15 +41,15 @@ export class IncrementalUpdater {
     this.log.info("Starting Incremental Updater");
     setInterval(async () => {
       if (this.isRunning) {
-        this.log.info("Incremental update already running. Bailing..."); // @DEBUG
+        this.log.info("Incremental update already running. Bailing...");
         return;
       }
 
       this.isRunning = true;
       const updates = await this.db.getPendingIncrementalUpdates();
-      debug(JSON.stringify(updates, null, 2));
       if (updates.docs.length > 0) {
         this.log.info(`Found ${updates.docs.length} updates...`);
+        debug("Pending updates: O%", updates);
       }
       // we need to order them by timestamp
       updates.docs.forEach(async (doc) => {
@@ -92,6 +92,7 @@ export class IncrementalUpdater {
             ...doc,
             ...res,
           });
+          debug(`Marked pending update ${doc._id} as completed.`);
         };
         const discoursePostFailed = (e: Error) => {
           this.log.error("Error posting to Discourse", { meta: e });
