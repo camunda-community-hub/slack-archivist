@@ -20,16 +20,15 @@ export class PostBuilder {
   }: {
     slackPromoMessage?: string;
     userMap: UserCache;
-    messages: SlackMessageEvent[];
+    messages?: SlackMessageEvent[];
     botId: string;
   }) {
     this.slackPromoMessage = slackPromoMessage;
     this.userMap = userMap;
     // Remove the last message, because it is the call to the bot
-    messages.pop();
+    messages?.pop();
     // Remove any previous messages from the bot
-    this.messages = messages.filter((msg) => msg.user !== botId);
-    console.log("messages", messages); //@DEBUG
+    this.messages = messages?.filter((msg) => msg.user !== botId) || [];
   }
 
   /**
@@ -63,7 +62,7 @@ export class PostBuilder {
     return this.messages.filter(messageIsThreadParent)[0];
   }
 
-  buildMarkdownPost() {
+  buildMarkdownPost(messages: SlackMessageEvent[] = this.messages) {
     const optionallyAddSlackPromo = (messages) =>
       this.slackPromoMessage
         ? [
@@ -76,7 +75,7 @@ export class PostBuilder {
         : messages;
 
     return optionallyAddSlackPromo(
-      this.replaceUsercodesWithNames(this.threadMessages(this.messages))
+      this.replaceUsercodesWithNames(this.threadMessages(messages))
     ).reduce(
       (prev, message) => `${prev}
 
@@ -86,6 +85,7 @@ export class PostBuilder {
   }
 
   threadMessages(messages: SlackMessageEvent[]) {
+    console.log("messages", messages); // @DEBUG
     const messageIsThreadParent = (event: SlackMessageEvent) =>
       event.thread_ts === event.ts;
 
@@ -101,6 +101,8 @@ export class PostBuilder {
         messageThread.push(reply[0]);
       }
     });
+    console.log("messageThread", messageThread); // @DEBUG
+
     return messageThread;
   }
 

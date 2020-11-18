@@ -60,19 +60,18 @@ async function main() {
     log.info(
       `Received a message event: user ${await userlookup.getUserName(
         event.user
-      )} in channel #${await userlookup.getChannelName(event.channel)} says ${
+      )} in channel #${await userlookup.getChannelName(event.channel)} says "${
         event.text
-      }`
+      }"`
     );
-    // Ignore the bot's own posts
-    if (event.user === botId) {
-      return;
-    }
-    // We need to bail here if it is an app_mention
     const { thread_ts } = event;
-    if (!thread_ts) {
+
+    const isPostByBot = event.user === botId;
+    const isPostToBot = event.text.includes(`<@${botId}>`);
+    if (isPostByBot || isPostToBot || !thread_ts) {
       return;
     }
+
     const archivedThread = await db.getArchivedConversation(thread_ts);
     if (archivedThread) {
       // We use a transactional outbox pattern to avoid losing anything if Discourse is 404
