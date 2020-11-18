@@ -2,6 +2,8 @@ import { SlackMessageEvent } from "./lib/SlackMessage";
 import { createSuccessMessage } from "./messages/post-success";
 import { UserCache } from "./UserNameLookupService";
 
+const debug = require("debug")("postbuilder");
+
 interface ParsedMessage {
   text: string;
   user: string;
@@ -29,6 +31,7 @@ export class PostBuilder {
     messages?.pop();
     // Remove any previous messages from the bot
     this.messages = messages?.filter((msg) => msg.user !== botId) || [];
+    debug(JSON.stringify(messages, null, 2));
   }
 
   /**
@@ -85,7 +88,6 @@ export class PostBuilder {
   }
 
   threadMessages(messages: SlackMessageEvent[]) {
-    console.log("messages", messages); // @DEBUG
     const messageIsThreadParent = (event: SlackMessageEvent) =>
       event.thread_ts === event.ts;
 
@@ -101,7 +103,8 @@ export class PostBuilder {
         messageThread.push(reply[0]);
       }
     });
-    console.log("messageThread", messageThread); // @DEBUG
+    debug("messageThread:");
+    debug(messageThread);
 
     return messageThread;
   }
