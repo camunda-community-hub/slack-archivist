@@ -11,7 +11,7 @@ services:
       - VIRTUAL_HOST=slack-archivist.joshwulf.com
       - LETSENCRYPT_HOST=slack-archivist.joshwulf.com
       - LETSENCRYPT_EMAIL=josh@magikcraft.io
-      - DEBUG=main,db,updates,postbuilder
+      - DEBUG=main,db,updates,postbuilder,db
     volumes:
       - "${PWD}/.env:/usr/src/app/.env"
       - "${PWD}/db:/usr/src/app/db"

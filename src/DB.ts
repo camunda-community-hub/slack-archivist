@@ -5,6 +5,8 @@ import path from "path";
 import { getLogger } from "./lib/Log";
 import winston from "winston";
 
+const debug = require("debug")("db");
+
 const pouchCollate = require("pouchdb-collate");
 PouchDB.plugin(require("pouchdb-find"));
 
@@ -187,6 +189,7 @@ class DBWrapper {
 
   getArchivedConversation(thread_ts: string) {
     const _id = this.getArchivedConversationId(thread_ts);
+    debug(`Requesting ArchivedConversationId ${_id}`);
     return this.db
       .get(_id)
       .then((docs) => docs[0] as ArchivedConversation)
