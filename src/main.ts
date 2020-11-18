@@ -241,7 +241,7 @@ async function main() {
   const app = express();
 
   // *** Plug the event adapter into the express app as middleware ***
-  app.use("/slack/events", slackEvents.expressMiddleware());
+  app.use("/action-endpoint", slackEvents.expressMiddleware());
 
   const port = configuration.slack.port;
   http.createServer(app).listen(port, () => {
