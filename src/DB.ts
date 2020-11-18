@@ -192,8 +192,14 @@ class DBWrapper {
     debug(`Requesting ArchivedConversationId ${_id}`);
     return this.db
       .get(_id)
-      .then((docs) => docs[0] as ArchivedConversation)
-      .catch((e) => null);
+      .then((docs) => {
+        const res = docs[0] as ArchivedConversation;
+        debug(res);
+      })
+      .catch((e) => {
+        debug(e);
+        return null;
+      });
   }
 
   private getArchivedConversationId(thread_ts: string) {
