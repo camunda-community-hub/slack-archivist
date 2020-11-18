@@ -20,6 +20,7 @@ import chalk from "chalk";
 import { IncrementalUpdater } from "./IncrementalUpdater";
 import http from "http";
 import express from "express";
+import bodyParser from "body-parser";
 
 const debug = require("debug")("main");
 
@@ -246,21 +247,20 @@ async function main() {
   // https://github.com/slackapi/node-slack-sdk/blob/main/examples/express-all-interactions/server.js
   app.use("/interactive-endpoint", slackInteractions.expressMiddleware());
 
+  app.post(
+    "/discourse",
+    bodyParser.urlencoded({ extended: false }),
+    (req, res) => {
+      log.info("Discourse", { meta: req.body });
+      res.status(200);
+      res.end();
+    }
+  );
+
   const port = configuration.slack.port;
   http.createServer(app).listen(port, () => {
     console.log(`server listening on port ${port}`);
   });
-
-  // const server = await slackEvents.start(parseInt(configuration.slack.port));
-
-  // const address = server.address();
-  // const port = isAddressInfo(address) ? address.port : address;
-
-  // log.info(`Listening for events on ${port}`);
 }
-
-// function isAddressInfo(maybeAddressInfo): maybeAddressInfo is AddressInfo {
-//   return !!maybeAddressInfo?.port;
-// }
 
 main();
