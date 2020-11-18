@@ -73,6 +73,14 @@ class DBWrapper {
         })
         .then(indexSuccess)
         .catch(indexError);
+      this.db
+        .createIndex({
+          index: {
+            fields: ["type", "topic_id"],
+          },
+        })
+        .then(indexSuccess)
+        .catch(indexError);
 
       if (conf.db.url) {
         const remoteCouch = new PouchDB(conf.db.url);
@@ -159,6 +167,15 @@ class DBWrapper {
         debug(`Response: ${e}`);
         return null;
       });
+  }
+
+  deleteArchivedConversationFromDiscourse(topic_id: number) {
+    if (!topic_id) {
+      return;
+    }
+    this.db
+      .find({ selector: { topic_id, type: DocType.ArchivedConversation } })
+      .then((res) => res?.docs?.[0] && this.db.remove(res.docs[0]));
   }
 
   private getArchivedConversationId(thread_ts: string) {

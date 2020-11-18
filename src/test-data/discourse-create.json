@@ -1,0 +1,46 @@
+{
+    "topic": {
+        "id": 1806,
+        "title": "Is this thing on?",
+        "fancy_title": "Is this thing on?",
+        "posts_count": 1,
+        "created_at": "2020-11-18T10:33:52.089Z",
+        "views": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "last_posted_at": "2020-11-18T10:33:52.218Z",
+        "visible": true,
+        "closed": false,
+        "archived": false,
+        "archetype": "regular",
+        "slug": "is-this-thing-on",
+        "category_id": 16,
+        "word_count": 87,
+        "deleted_at": null,
+        "user_id": 541,
+        "featured_link": null,
+        "pinned_globally": false,
+        "pinned_at": null,
+        "pinned_until": null,
+        "unpinned": null,
+        "pinned": false,
+        "highest_post_number": 1,
+        "deleted_by": null,
+        "has_deleted": false,
+        "bookmarked": false,
+        "participant_count": 1,
+        "thumbnails": null,
+        "created_by": {
+            "id": 541,
+            "username": "slack-archivist",
+            "name": "Slack Archivist Bot",
+            "avatar_template": "/user_avatar/forum.zeebe.io/slack-archivist/{size}/926_2.png"
+        },
+        "last_poster": {
+            "id": 541,
+            "username": "slack-archivist",
+            "name": "Slack Archivist Bot",
+            "avatar_template": "/user_avatar/forum.zeebe.io/slack-archivist/{size}/926_2.png"
+        }
+    }
+}

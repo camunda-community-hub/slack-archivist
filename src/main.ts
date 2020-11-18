@@ -248,9 +248,19 @@ async function main() {
   app.use("/interactive-endpoint", slackInteractions.expressMiddleware());
 
   app.post("/discourse", bodyParser.json(), (req, res) => {
-    log.info("Discourse", { meta: req.body });
+    // topic_created <- also comes in
+    const topic_destroyed =
+      req.header["X-Discourse-Event"] === "topic_destroyed";
     res.status(200);
     res.send({ ok: true });
+    if (topic_destroyed) {
+      const topic_id = req.body?.topic?.id;
+      log.info(
+        `Discourse webhook: Deleting topic ${topic_destroyed} from database`
+      );
+      db.deleteArchivedConversationFromDiscourse(topic_id);
+      // Delete this from the database
+    }
   });
 
   const port = configuration.slack.port;
