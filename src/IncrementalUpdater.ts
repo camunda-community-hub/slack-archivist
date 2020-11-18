@@ -62,8 +62,8 @@ export class IncrementalUpdater {
 
         const text = `**${scrubbed.user}**: ${scrubbed.text}`;
 
-        console.log("text", text);
-        console.log("doc", doc);
+        this.log.info("text", { meta: text });
+        this.log.info("doc", { meta: doc });
         const existingPostFromDb = await this.db.getArchivedConversation(
           doc.thread_ts
         );
@@ -77,7 +77,10 @@ export class IncrementalUpdater {
           (await this.discourseAPI.getPost(existingPostFromDb.topic_id));
 
         // Post was deleted
-        if (postFromDiscourse && postFromDiscourse.status === 404) {
+        if (
+          !postFromDiscourse ||
+          (postFromDiscourse && postFromDiscourse.status === 404)
+        ) {
           return this.db.discardPendingIncrementalUpdate(doc);
         }
 
