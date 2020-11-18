@@ -24,46 +24,6 @@ export enum DocType {
   IncrementalUpdatePostDeleted = "IncrementalUpdatePostDeleted",
 }
 
-interface NewArchivedConversation {
-  thread_ts: string;
-  post: string;
-  title: string;
-  url: string;
-  baseUrl: string;
-  topic_slug: string;
-  topic_id: number;
-}
-
-export interface ArchivedConversation extends NewArchivedConversation {
-  _id: string;
-  type: DocType.ArchivedConversation;
-}
-
-interface NewIncrementalUpdatePending {
-  thread_ts: string;
-  message: string;
-  user: string;
-}
-
-export interface IncrementalUpdatePending extends NewIncrementalUpdatePending {
-  _id: string;
-  type: DocType.IncrementalUpdatePending;
-  timestamp: string;
-}
-
-export interface IncrementalUpdate extends NewIncrementalUpdatePending {
-  _id: string;
-  type: DocType.IncrementalUpdate;
-  archivedAt: string;
-}
-
-export interface IncrementalUpdatePostDeleted
-  extends NewIncrementalUpdatePending {
-  _id: string;
-  type: DocType.IncrementalUpdatePostDeleted;
-  archivedAt: string;
-}
-
 let _db: DBWrapper;
 
 export async function getDB(conf: Configuration) {
@@ -133,7 +93,7 @@ class DBWrapper {
       this.db.info().then((res) => log.info("Database info:", { meta: res }));
       this.db
         .allDocs({ include_docs: true })
-        .then((docs) => console.log("allDocs", JSON.stringify(docs, null, 2))); // @DEBUG
+        .then((docs) => debug("allDocs", JSON.stringify(docs, null, 2))); // @DEBUG
     });
   }
 
@@ -207,4 +167,44 @@ class DBWrapper {
       thread_ts,
     ]);
   }
+}
+
+interface NewArchivedConversation {
+  thread_ts: string;
+  post: string;
+  title: string;
+  url: string;
+  baseUrl: string;
+  topic_slug: string;
+  topic_id: number;
+}
+
+export interface ArchivedConversation extends NewArchivedConversation {
+  _id: string;
+  type: DocType.ArchivedConversation;
+}
+
+interface NewIncrementalUpdatePending {
+  thread_ts: string;
+  message: string;
+  user: string;
+}
+
+export interface IncrementalUpdatePending extends NewIncrementalUpdatePending {
+  _id: string;
+  type: DocType.IncrementalUpdatePending;
+  timestamp: string;
+}
+
+export interface IncrementalUpdate extends NewIncrementalUpdatePending {
+  _id: string;
+  type: DocType.IncrementalUpdate;
+  archivedAt: string;
+}
+
+export interface IncrementalUpdatePostDeleted
+  extends NewIncrementalUpdatePending {
+  _id: string;
+  type: DocType.IncrementalUpdatePostDeleted;
+  archivedAt: string;
 }
