@@ -90,7 +90,7 @@ class DBWrapper {
       this.db
         .createIndex({
           index: {
-            fields: ["op"],
+            fields: ["thread_ts"],
           },
         })
         .then(indexSuccess)
@@ -99,6 +99,14 @@ class DBWrapper {
         .createIndex({
           index: {
             fields: ["url"],
+          },
+        })
+        .then(indexSuccess)
+        .catch(indexError);
+      this.db
+        .createIndex({
+          index: {
+            fields: ["type"],
           },
         })
         .then(indexSuccess)
@@ -122,7 +130,7 @@ class DBWrapper {
       }
       this.db.info().then((res) => log.info("Database info:", { meta: res }));
       this.db
-        .allDocs()
+        .allDocs({ include_docs: true })
         .then((docs) => console.log("allDocs", JSON.stringify(docs, null, 2))); // @DEBUG
     });
   }
