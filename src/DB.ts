@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { getLogger } from "./lib/Log";
 import winston from "winston";
+import { runInThisContext } from "vm";
 
 const debug = require("debug")("db");
 
@@ -175,7 +176,10 @@ class DBWrapper {
     }
     this.db
       .find({ selector: { topic_id, type: DocType.ArchivedConversation } })
-      .then((res) => res?.docs?.[0] && this.db.remove(res.docs[0]));
+      .then((res) => res?.docs?.[0] && this.db.remove(res.docs[0]))
+      .catch((e) =>
+        this.log.error("Error deleting Discourse post record:", { meta: e })
+      );
   }
 
   private getArchivedConversationId(thread_ts: string) {
