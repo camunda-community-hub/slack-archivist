@@ -180,28 +180,22 @@ class DBWrapper {
       .get(_id)
       .then((old) => this.db.remove(old))
       .catch((e) => `No existing record`);
-    return this.db.put({
-      type,
-      _id: this.getArchivedConversationId(doc.thread_ts),
-      ...doc,
-    });
+    return this.db
+      .put({
+        type,
+        _id: this.getArchivedConversationId(doc.thread_ts),
+        ...doc,
+      })
+      .catch((e) => this.log.error(e));
   }
 
   getArchivedConversation(thread_ts: string) {
     const _id = this.getArchivedConversationId(thread_ts);
     debug(`Requesting ArchivedConversationId ${_id}`);
-    return this.db
-      .get(_id)
-      .then((docs) => {
-        debug(docs);
-        const res = docs[0] as ArchivedConversation;
-        debug(res);
-        return res;
-      })
-      .catch((e) => {
-        debug(e);
-        return null;
-      });
+    return this.db.get(_id).catch((e) => {
+      debug(e);
+      return null;
+    });
   }
 
   private getArchivedConversationId(thread_ts: string) {
