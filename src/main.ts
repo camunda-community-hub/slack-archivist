@@ -1,6 +1,6 @@
 // process.env.DEBUG = "@slack/events-api:*"; // @DEBUG
 
-import { AddressInfo } from "net";
+// import { AddressInfo } from "net";
 import { SlackMessageEvent } from "./lib/SlackMessage";
 import { getAll } from "./webapi-pagination";
 import { UserNameLookupService } from "./UserNameLookupService";
@@ -18,6 +18,8 @@ import { getDB } from "./DB";
 import { getLogger } from "./lib/Log";
 import chalk from "chalk";
 import { IncrementalUpdater } from "./IncrementalUpdater";
+import http from "http";
+import express from "express";
 
 const debug = require("debug")("main");
 
@@ -236,16 +238,26 @@ async function main() {
     fold(discoursePostFailed, discoursePostSucceeded)(res);
   });
 
-  const server = await slackEvents.start(parseInt(configuration.slack.port));
+  const app = express();
 
-  const address = server.address();
-  const port = isAddressInfo(address) ? address.port : address;
+  // *** Plug the event adapter into the express app as middleware ***
+  app.use("/slack/events", slackEvents.expressMiddleware());
 
-  log.info(`Listening for events on ${port}`);
+  const port = configuration.slack.port;
+  http.createServer(app).listen(port, () => {
+    console.log(`server listening on port ${port}`);
+  });
+
+  // const server = await slackEvents.start(parseInt(configuration.slack.port));
+
+  // const address = server.address();
+  // const port = isAddressInfo(address) ? address.port : address;
+
+  // log.info(`Listening for events on ${port}`);
 }
 
-function isAddressInfo(maybeAddressInfo): maybeAddressInfo is AddressInfo {
-  return !!maybeAddressInfo?.port;
-}
+// function isAddressInfo(maybeAddressInfo): maybeAddressInfo is AddressInfo {
+//   return !!maybeAddressInfo?.port;
+// }
 
 main();

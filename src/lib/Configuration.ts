@@ -12,7 +12,9 @@ const SlackConfig = t.type({
   token: t.string,
   signingSecret: t.string,
   botname: t.string,
-  port: t.string,
+  port: t.number,
+  client_id: t.string,
+  client_secret: t.string,
 });
 
 const DBConfig = t.partial({
@@ -59,7 +61,9 @@ export async function getConfiguration(): Promise<Configuration> {
     token: process.env.SLACK_TOKEN,
     signingSecret: process.env.SLACK_SIGNING_SECRET,
     botname: process.env.SLACK_BOTNAME,
-    port: process.env.SLACK_PORT || "3000",
+    port: parseInt(process.env.SLACK_PORT || "3000"),
+    client_secret: process.env.SLACK_CLIENT_SECRETS,
+    client_id: process.env.SLACK_CLIENT_ID,
   });
 
   const log = {
