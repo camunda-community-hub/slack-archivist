@@ -1,6 +1,6 @@
 export const helpText = `Hi, I'm the Slack Archivist.
 
-I can send useful conversation threads to the Zeebe forum, to capture valuable information. 
+I can send useful conversation threads to the [Zeebe forum](https://forum.zeebe.io), to capture valuable information. 
 
 When you see a thread worth capturing, tag me with @archivist in a reply to the conversation, and I'll send the thread to the forum, and keep watching it for updates. 
   
