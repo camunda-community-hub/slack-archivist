@@ -195,6 +195,7 @@ class DBWrapper {
       .then((docs) => {
         const res = docs[0] as ArchivedConversation;
         debug(res);
+        return res;
       })
       .catch((e) => {
         debug(e);
