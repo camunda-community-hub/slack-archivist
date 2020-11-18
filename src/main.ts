@@ -247,9 +247,7 @@ async function main() {
   // https://github.com/slackapi/node-slack-sdk/blob/main/examples/express-all-interactions/server.js
   app.use("/interactive-endpoint", slackInteractions.expressMiddleware());
 
-  app.use(bodyParser.urlencoded({ extended: true }));
-
-  app.post("/discourse", (req, res) => {
+  app.post("/discourse", bodyParser.json(), (req, res) => {
     log.info("Discourse", { meta: req.body });
     res.status(200);
     res.send({ ok: true });
