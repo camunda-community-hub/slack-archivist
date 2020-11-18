@@ -234,7 +234,7 @@ async function main() {
         topic_slug: res.topic_slug,
         topic_id: res.topic_id,
       });
-      log.info("Created post in Discourse: %O", res);
+      log.info("Created post in Discourse:", { meta: res });
     };
     fold(discoursePostFailed, discoursePostSucceeded)(res);
   });
@@ -249,11 +249,11 @@ async function main() {
 
   app.post(
     "/discourse",
-    bodyParser.urlencoded({ extended: false }),
+    bodyParser.urlencoded({ extended: true }),
     (req, res) => {
       log.info("Discourse", { meta: req.body });
       res.status(200);
-      res.end();
+      res.send({ ok: true });
     }
   );
 
