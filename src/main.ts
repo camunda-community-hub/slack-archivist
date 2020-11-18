@@ -39,7 +39,7 @@ async function main() {
   log.info(chalk.greenBright("***** Starting the Slack Archivist bot *****\n"));
   const db = await getDB(configuration);
   const discourseAPI = new DiscourseAPI(configuration.discourse);
-  const { slackEvents, slackWeb, slackInteractive } = getSlack(
+  const { slackEvents, slackWeb, slackInteractions } = getSlack(
     configuration.slack
   );
   const userlookup = new UserNameLookupService(slackWeb, configuration.slack);
@@ -242,6 +242,9 @@ async function main() {
 
   // *** Plug the event adapter into the express app as middleware ***
   app.use("/action-endpoint", slackEvents.expressMiddleware());
+
+  // https://github.com/slackapi/node-slack-sdk/blob/main/examples/express-all-interactions/server.js
+  app.use("/interactive-endpoint", slackInteractions.expressMiddleware());
 
   const port = configuration.slack.port;
   http.createServer(app).listen(port, () => {

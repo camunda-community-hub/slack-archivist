@@ -7,6 +7,6 @@ export function getSlack(slack: SlackConfigObject) {
   return {
     slackEvents: createEventAdapter(slack.signingSecret),
     slackWeb: new WebClient(slack.token),
-    slackInteractive: createMessageAdapter(slack.signingSecret),
+    slackInteractions: createMessageAdapter(slack.signingSecret),
   };
 }
