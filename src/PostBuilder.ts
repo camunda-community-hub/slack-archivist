@@ -34,30 +34,6 @@ export class PostBuilder {
     debug("Input messages: $O" + JSON.stringify(messages, null, 2));
   }
 
-  /**
-   * Scans back through the messages to see if the Archivist reported that it
-   * archived it earlier in the conversation.
-   */
-  hasAlreadyBeenArchived() {
-    const uniqueString = "_x_^_0_";
-    const archivistMessage = createSuccessMessage(uniqueString);
-    const archivistFragment = archivistMessage.substring(
-      0,
-      archivistMessage.indexOf(uniqueString)
-    );
-    const previousArchive = this.messages.filter((message) =>
-      message.text.includes(archivistFragment)
-    );
-    if (previousArchive.length === 0) return false;
-    const previousArchiveMessage = previousArchive[0].text;
-
-    const urlStartsAt = archivistMessage.indexOf(uniqueString);
-    return previousArchiveMessage.substring(
-      urlStartsAt,
-      previousArchiveMessage.indexOf(" ", urlStartsAt)
-    );
-  }
-
   getOP() {
     const messageIsThreadParent = (event: SlackMessageEvent) =>
       event.thread_ts === event.ts;

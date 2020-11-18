@@ -185,7 +185,7 @@ async function main() {
 
     if (existingPostFromDb) {
       const doc = existingPostFromDb;
-      const existingPost = await discourseAPI.getPost(doc.url);
+      const existingPost = await discourseAPI.getPost(doc.topic_id);
       if (existingPost && existingPost.status === 200) {
         return slackWeb.chat.postEphemeral({
           user: event.user,
@@ -200,30 +200,6 @@ async function main() {
       }
     }
 
-    /**
-     * This is here as a fallback for the database. If the database is lost, we may
-     * be able to detect an attempt to archive an already archived thread by seeing the
-     * earlier message from the Slack Archivist saying it was archived.
-     *
-     * If we find one, we check the URL to see if it is actually in Discourse. It may
-     * have been deleted, and a user may be attempting to re-archive it.
-     */
-    const existingUrlFromThread = postBuilder.hasAlreadyBeenArchived();
-    if (existingUrlFromThread) {
-      const existingPost = await discourseAPI.getPost(existingUrlFromThread);
-      if (existingPost) {
-        return slackWeb.chat.postEphemeral({
-          user: event.user,
-          channel: event.channel,
-          thread: thread_ts,
-          text: `This is already archived at ${existingUrlFromThread}.`,
-        });
-      } else {
-        log.info(
-          `There is a message in the thread saying this was already archived, but we can't find it in Discourse`
-        );
-      }
-    }
     const discoursePost = await postBuilder.buildMarkdownPost();
 
     log.info("Title", { meta: title }); // @DEBUG

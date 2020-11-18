@@ -74,7 +74,7 @@ export class IncrementalUpdater {
 
         const postFromDiscourse =
           existingPostFromDb &&
-          (await this.discourseAPI.getPost(existingPostFromDb.url));
+          (await this.discourseAPI.getPost(existingPostFromDb.topic_id));
 
         // Post was deleted
         if (postFromDiscourse && postFromDiscourse.status === 404) {

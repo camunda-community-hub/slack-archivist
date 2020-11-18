@@ -89,20 +89,16 @@ export class DiscourseAPI {
     });
   }
 
-  async getPost(url: string) {
-    debug(url);
-    const ids = url.substr(url.indexOf("t/"));
-    const id = ids.substr(ids.indexOf("/") + 1);
-    const req = `/posts/${id}.json`;
+  async getPost(topic_id: number) {
+    const req = `/posts/${topic_id}.json`;
     debug(`Request url: ${req}`);
-    try {
-      const res = await this.limit.runRateLimited({
+    return this.limit
+      .runRateLimited({
         task: () => this.http.get(req),
+      })
+      .catch((e) => {
+        debug(e);
+        return false as false;
       });
-      return res;
-    } catch (e) {
-      debug(e);
-      return false;
-    }
   }
 }
