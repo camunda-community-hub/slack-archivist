@@ -21,11 +21,6 @@
   "bugs": {
     "url": "https://github.com/jwulf/slack-archivist/issues"
   },
-  "husky": {
-    "hooks": {
-      "precommit": "tsc"
-    }
-  },
   "homepage": "https://github.com/jwulf/slack-archivist#readme",
   "dependencies": {
     "@slack/events-api": "^2.3.1",
