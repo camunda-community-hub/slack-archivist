@@ -265,7 +265,7 @@ async function main() {
 
   const port = configuration.slack.port;
   http.createServer(app).listen(port, () => {
-    console.log(`server listening on port ${port}`);
+    log.info(`server listening on port ${port}`);
   });
 }
 

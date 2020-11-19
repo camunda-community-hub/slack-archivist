@@ -1,5 +1,4 @@
 import { SlackMessageEvent } from "./lib/SlackMessage";
-import { createSuccessMessage } from "./messages/post-success";
 import { UserCache } from "./UserNameLookupService";
 
 const debug = require("debug")("postbuilder");
@@ -31,7 +30,7 @@ export class PostBuilder {
     messages?.pop();
     // Remove any previous messages from the bot
     this.messages = messages?.filter((msg) => msg.user !== botId) || [];
-    debug("Input messages: $O" + JSON.stringify(messages, null, 2));
+    debug("Input messages: %O", JSON.stringify(messages, null, 2));
   }
 
   getOP() {
