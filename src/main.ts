@@ -1,6 +1,5 @@
 // process.env.DEBUG = "@slack/events-api:*"; // @DEBUG
 
-// import { AddressInfo } from "net";
 import { SlackMessageEvent } from "./lib/SlackMessage";
 import { getAll } from "./webapi-pagination";
 import { UserNameLookupService } from "./UserNameLookupService";
@@ -51,7 +50,7 @@ async function main() {
     discourseAPI: discourseAPI,
     postBuilder: new PostBuilder({
       slackPromoMessage: promoText,
-      userMap: await userlookup.getUsernameDictionary(),
+      userMap: userlookup,
       messages: [],
       botId: await userlookup.getBotUserId(),
     }),
@@ -117,9 +116,7 @@ async function main() {
       as_user: true,
       text: helpText,
     });
-    log.info(
-      `Sent intro DM to ${(await userlookup.getUsernameDictionary())[user]}...`
-    );
+    log.info(`Sent intro DM to ${await userlookup.getUserName(user)}...`);
   });
 
   /** Archive a thread */
@@ -172,7 +169,7 @@ async function main() {
 
     const postBuilder = new PostBuilder({
       slackPromoMessage: promoText,
-      userMap: await userlookup.getUsernameDictionary(),
+      userMap: userlookup,
       messages: await getAll(
         slackWeb.conversations.replies,
         {
@@ -255,11 +252,11 @@ async function main() {
     res.send({ ok: true });
     if (topic_destroyed) {
       const topic_id = req.body?.topic?.id;
-      log.info(
-        `Discourse webhook: Deleting topic ${topic_destroyed} from database`
-      );
-      db.deleteArchivedConversationFromDiscourse(topic_id);
-      // Delete this from the database
+      if (topic_id) {
+        log.info(`Discourse webhook: Deleting topic ${topic_id} from database`);
+        db.deleteArchivedConversationFromDiscourse(topic_id);
+        // Delete this from the database
+      }
     }
   });
 

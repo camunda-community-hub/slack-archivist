@@ -8,13 +8,13 @@ import winston from "winston";
 const CACHEFILE = "./user-cache.json";
 type Username = string;
 type Channelname = string;
-export type UserCache = { [usercode: string]: Username };
+type UserCache = { [usercode: string]: Username };
 export type ChannelCache = { [channelcode: string]: Channelname };
 
 // Caches the user list for 24 hours for performance and to avoid rate-limiting
 export class UserNameLookupService {
   slackWeb: WebClient;
-  userCache: UserCache;
+  private userCache: UserCache;
   channelCache: ChannelCache;
   ready: Promise<void>;
   botname: string;
@@ -73,6 +73,11 @@ export class UserNameLookupService {
 
   async getUserName(usercode: string) {
     await this.ready;
+    if (!this.userCache[usercode]) {
+      const res: any = await this.slackWeb.users.info({ user: usercode });
+      this.userCache[usercode] =
+        res.user.profile?.display_name || res.user.name;
+    }
     return this.userCache[usercode];
   }
 
@@ -82,11 +87,6 @@ export class UserNameLookupService {
       usercode,
       username: this.userCache[usercode],
     }));
-  }
-
-  async getUsernameDictionary() {
-    await this.ready;
-    return this.userCache;
   }
 
   async getBotUserId(): Promise<string> {
@@ -116,7 +116,7 @@ export class UserNameLookupService {
       {}
     );
 
-    this.log.info(`Fetched ${users?.length} from Slack via user.list`);
+    this.log.info(`Fetched ${users?.length} users from Slack via user.list`);
     try {
       writeFileSync(CACHEFILE, JSON.stringify(this.userCache, null, 2));
       this.log.info("Wrote user cache to disk");

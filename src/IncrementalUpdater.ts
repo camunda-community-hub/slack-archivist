@@ -53,7 +53,7 @@ export class IncrementalUpdater {
       }
       // we need to order them by timestamp
       updates.docs.forEach(async (doc) => {
-        const [scrubbed] = this.postBuilder.replaceUsercodesWithNames([
+        const [scrubbed] = await this.postBuilder.replaceUsercodesWithNames([
           {
             text: doc.message,
             user: doc.user,

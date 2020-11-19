@@ -1,5 +1,5 @@
 import { SlackMessageEvent } from "./lib/SlackMessage";
-import { UserCache } from "./UserNameLookupService";
+import { UserNameLookupService } from "./UserNameLookupService";
 
 const debug = require("debug")("postbuilder");
 
@@ -10,7 +10,7 @@ interface ParsedMessage {
 
 export class PostBuilder {
   slackPromoMessage: string | undefined;
-  userMap: UserCache;
+  userMap: UserNameLookupService;
   messages: SlackMessageEvent[];
 
   constructor({
@@ -20,7 +20,7 @@ export class PostBuilder {
     botId,
   }: {
     slackPromoMessage?: string;
-    userMap: UserCache;
+    userMap: UserNameLookupService;
     messages?: SlackMessageEvent[];
     botId: string;
   }) {
@@ -40,7 +40,7 @@ export class PostBuilder {
     return this.messages.filter(messageIsThreadParent)[0];
   }
 
-  buildMarkdownPost(messages: SlackMessageEvent[] = this.messages) {
+  async buildMarkdownPost(messages: SlackMessageEvent[] = this.messages) {
     const optionallyAddSlackPromo = (messages) =>
       this.slackPromoMessage
         ? [
@@ -53,7 +53,7 @@ export class PostBuilder {
         : messages;
 
     return optionallyAddSlackPromo(
-      this.replaceUsercodesWithNames(this.threadMessages(messages))
+      await this.replaceUsercodesWithNames(this.threadMessages(messages))
     ).reduce(
       (prev, message) => `${prev}
 
@@ -67,17 +67,19 @@ export class PostBuilder {
     return messages;
   }
 
-  replaceUsercodesWithNames(
+  async replaceUsercodesWithNames(
     messageThread: SlackMessageEvent[]
-  ): ParsedMessage[] {
+  ): Promise<ParsedMessage[]> {
     // replace the user code in the messages with the name, and return just text and username
-    return messageThread.map((message) => ({
-      ...message,
-      user: this.userMap[message.user] ?? message.user,
-      text: this._addReturnForBackTicks(
-        this.replaceUsercodesInText(message.text)
-      ),
-    }));
+    return Promise.all(
+      messageThread.map(async (message) => ({
+        ...message,
+        user: (await this.userMap.getUserName(message.user)) ?? message.user,
+        text: this._addReturnForBackTicks(
+          await this.replaceUsercodesInText(message.text)
+        ),
+      }))
+    );
   }
 
   _addTrailingReturnForBackTicks(text: string) {
@@ -106,7 +108,7 @@ export class PostBuilder {
   }
 
   // Assumes all Slack usercodes have 9 chars
-  replaceUsercodesInText(text: string): string {
+  async replaceUsercodesInText(text: string): Promise<string> {
     const start = text.indexOf("<@");
     if (start === -1) {
       return text;
@@ -114,7 +116,7 @@ export class PostBuilder {
     if (text.substr(start + 11, 1) === ">") {
       const substring = text.substr(start, 12);
       const usercode = substring.substring(2, 11);
-      const username = this.userMap[usercode] ?? usercode;
+      const username = (await this.userMap.getUserName(usercode)) ?? usercode;
       return this.replaceUsercodesInText(
         text.replace(substring, `@${username}`)
       );
