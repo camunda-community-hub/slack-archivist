@@ -61,6 +61,10 @@ async function main() {
   // Listens to all messages - **including app mentions**
   slackEvents.on("message", async (event: SlackMessageEvent) => {
     log.info("message");
+    if (!event.user) {
+      // This is a link unfurl, or something else where the user is undefined
+      return;
+    }
     log.info(
       `Received a message event: user ${await userlookup.getUserName(
         event.user
