@@ -26,10 +26,10 @@ const debug = require("debug")("main");
 require("dotenv").config();
 
 process.on("uncaughtException", (err) => {
-  console.log("err", err);
+  console.log("uncaughtException", err);
 });
 process.on("unhandledRejection", (err) => {
-  console.log("err", err);
+  console.log("unhandledRejection", err);
 });
 
 async function main() {
