@@ -183,21 +183,30 @@ export class _DBWrapper {
       );
   }
 
-  saveSlackFile(fileRecord: SlackFileRecord | SlackFile) {
-    const _id =
-      (fileRecord as SlackFileRecord)._id ||
-      this.getSlackFileId(fileRecord.slackUrl);
-    return this.db
-      .put({
-        ...fileRecord,
-        type: DocType.SlackFile,
-        _id,
-      })
-      .then((res) => (res as unknown) as SlackFileRecord)
-      .catch((e) => {
-        this.log.error(e);
-        return null;
-      });
+  async saveSlackFile(fileRecord: SlackFileRecord | SlackFile) {
+    const _id = this.getSlackFileId(fileRecord.slackUrl);
+    const record = {
+      ...fileRecord,
+      type: DocType.SlackFile as DocType.SlackFile,
+      _id,
+    };
+    try {
+      await this.db.put(record);
+      return record as SlackFileRecord;
+    } catch (e) {
+      this.log.error(e);
+      this.log.error(
+        `Posting ${JSON.stringify(
+          {
+            ...record,
+            data: record.data ? "erased" : "missing",
+          },
+          null,
+          2
+        )}`
+      );
+      return null;
+    }
   }
 
   getSlackFile(slackUrl: string) {
@@ -267,6 +276,7 @@ export interface SlackFile {
   slackUrl: string;
   data?: string;
   discourseUrl?: string;
+  mimetype: string;
 }
 
 export interface SlackFileRecord extends SlackFile {

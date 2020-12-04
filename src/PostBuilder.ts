@@ -1,7 +1,6 @@
 // import { SlackMessageEvent } from "./lib/SlackMessage";
 import { FileManager } from "./FileManager";
-import * as EventsApi from "seratch-slack-types/events-api";
-import * as WebApi from "seratch-slack-types/web-api";
+import { SlackMessageEvent } from "./lib/SlackMessage";
 
 const debug = require("debug")("postbuilder");
 
@@ -9,12 +8,13 @@ export interface FileUpload {
   slackUrl: string;
   data?: string;
   discourseUrl?: string;
+  mimetype: string;
 }
 
 export interface ParsedMessage {
   text: string;
   user: string;
-  fileUploads: FileUpload[];
+  fileUploads?: FileUpload[];
 }
 
 interface IUserNameLookupService {
@@ -28,8 +28,6 @@ interface IDiscourseAPI {
 interface IFileManager {
   getFiles(conversation: ParsedMessage[]): Promise<ParsedMessage[]>;
 }
-
-type SlackMessageEvent = WebApi.ConversationsListResponse;
 
 export class PostBuilder {
   private slackPromoMessage: string | undefined;
@@ -71,9 +69,9 @@ export class PostBuilder {
     const optionallyAddSlackPromo = (messages: ParsedMessage[]) =>
       this.slackPromoMessage
         ? [
+            ...messages,
             {
               fileUploads: [],
-              ...messages,
               user: "Note",
               text: this.slackPromoMessage,
             },
@@ -84,13 +82,15 @@ export class PostBuilder {
       await this.replaceUsercodesWithNames(this.threadMessages(messages))
     );
 
+    // tslint:disable-next-line: no-console
+    // console.log("threadedConversation", threadedConversation); // @DEBUG
     // Deal with pictures
     const convWithPictures = await this.fileManager.getFiles(
       threadedConversation
     );
 
     // tslint:disable-next-line: no-console
-    console.log("convWithPictures", JSON.stringify(convWithPictures, null, 2)); // @DEBUG
+    // console.log("convWithPictures", JSON.stringify(convWithPictures, null, 2)); // @DEBUG
 
     const markdownPost = threadedConversation.reduce(
       (prev, message) => `${prev}${this.fileUploadstoMarkdown(message)}
@@ -103,8 +103,8 @@ export class PostBuilder {
   }
 
   private fileUploadstoMarkdown(message: ParsedMessage) {
-    if (message.fileUploads.length === 0) return "";
-    const filelinks = message.fileUploads.reduce(
+    if (message.fileUploads?.length === 0) return "";
+    const filelinks = message.fileUploads?.reduce(
       (prev, curr) => `${prev}
 ![](${curr.discourseUrl})`,
       "\n"
@@ -113,12 +113,12 @@ export class PostBuilder {
   }
 
   threadMessages(messages: SlackMessageEvent[]) {
-    // Somehow it looks like the thread is now threaded already
     const threaded = messages.sort((a, b) => +a.ts - +b.ts);
     // Remove the last message in a multi-post conversation, because it is the call to the bot
     if (threaded.length > 1) {
       threaded.pop();
     }
+
     return threaded;
   }
 
@@ -129,13 +129,10 @@ export class PostBuilder {
     return Promise.all(
       messageThread.map(async (message) => ({
         ...message,
-        user: (await this.userMap.getUserName(message.user)) ?? message.user,
+        user: (await this.userMap.getUserName(message.user!)) ?? message.user,
         text: this._addReturnForBackTicks(
           await this.replaceUsercodesInText(message.text)
         ),
-        fileUploads: (message.files || []).map((file) => ({
-          slackUrl: file.url_private,
-        })),
       }))
     );
   }

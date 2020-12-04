@@ -5,6 +5,8 @@ import Axios, { AxiosInstance } from "axios";
 import * as E from "fp-ts/Either";
 import { DiscourseConfigObject } from "./lib/Configuration";
 import { RateLimiter } from "./lib/Ratelimiter";
+import FormData from "form-data";
+import { FileUpload } from "./PostBuilder";
 
 const debug = require("debug")("discourse");
 
@@ -91,7 +93,6 @@ export class DiscourseAPI {
 
   async getPost(topic_id: number) {
     const req = `/t/${topic_id}.json`;
-    debug(`Request url: ${req}`);
     return this.limit
       .runRateLimited({
         task: () => this.http.get(req),
@@ -105,21 +106,43 @@ export class DiscourseAPI {
       });
   }
 
-  async uploadFile(file: string) {
+  async uploadFile(file: FileUpload) {
+    const form = new FormData();
+    form.append("type", "composer");
+    form.append("synchronous", "true");
+    form.append("files[]", this.stringToBinary(file.data), {
+      contentType: file.mimetype,
+    });
     return this.limit.runRateLimited({
       task: () =>
         this.http
-          .post("/uploads.json", {
-            file,
-            synchronous: true,
+          .post("/uploads.json", form.getBuffer(), {
+            headers: form.getHeaders(),
           })
-          .then(({ data }) => ({
-            url: data.url,
-          }))
+          .then(({ data }) => {
+            console.info(
+              "Response from Discourse",
+              JSON.stringify(data, null, 2)
+            );
+            return {
+              url: data.url,
+            };
+          })
           .catch((e) => {
-            console.error("Error uploading file to Discourse", e);
-            return null;
+            console.error("Error uploading file to Discourse", e.message);
+            throw e;
           }),
+    });
+  }
+
+  private stringToBinary(str, spaceSeparatedOctets?) {
+    function zeroPad(num) {
+      return "00000000".slice(String(num).length) + num;
+    }
+
+    return str.replace(/[\s\S]/g, function (str) {
+      str = zeroPad(str.charCodeAt().toString(2));
+      return !1 == spaceSeparatedOctets ? str : str + " ";
     });
   }
 }

@@ -73,7 +73,7 @@ async function main() {
     fileManager,
     messages: [],
     botId: await userlookup.getBotUserId(),
-  }).buildMarkdownPostFromConversation(TestConversation);
+  }).buildMarkdownPostFromConversation(TestConversation as any);
   // @debug
 
   incrementalUpdater.start();
