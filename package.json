@@ -39,6 +39,7 @@
     "pouchdb-collate": "^7.2.2",
     "pouchdb-find": "^7.2.2",
     "pouchdb-node": "^7.2.2",
+    "seratch-slack-types": "^0.6.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {

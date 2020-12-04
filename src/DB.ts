@@ -4,7 +4,6 @@ import fs from "fs";
 import path from "path";
 import { getLogger } from "./lib/Log";
 import winston from "winston";
-import { runInThisContext } from "vm";
 
 const debug = require("debug")("db");
 
@@ -16,6 +15,7 @@ export type DB = PouchDB.Database<
   | IncrementalUpdatePending
   | IncrementalUpdate
   | IncrementalUpdatePostDeleted
+  | SlackFileRecord
 >;
 
 export enum DocType {
@@ -23,15 +23,16 @@ export enum DocType {
   IncrementalUpdate = "IncrementalUpdate",
   IncrementalUpdatePending = "IncrementalUpdatePending",
   IncrementalUpdatePostDeleted = "IncrementalUpdatePostDeleted",
+  SlackFile = "SlackFile",
 }
 
-let _db: DBWrapper;
+let _db: _DBWrapper;
 
 export async function getDB(conf: Configuration) {
-  return _db || (_db = new DBWrapper(conf)) || _db;
+  return _db || (_db = new _DBWrapper(conf)) || _db;
 }
 
-class DBWrapper {
+export class _DBWrapper {
   log!: winston.Logger;
   db!: DB;
 
@@ -182,6 +183,38 @@ class DBWrapper {
       );
   }
 
+  saveSlackFile(fileRecord: SlackFileRecord | SlackFile) {
+    const _id =
+      (fileRecord as SlackFileRecord)._id ||
+      this.getSlackFileId(fileRecord.slackUrl);
+    return this.db
+      .put({
+        ...fileRecord,
+        type: DocType.SlackFile,
+        _id,
+      })
+      .then((res) => (res as unknown) as SlackFileRecord)
+      .catch((e) => {
+        this.log.error(e);
+        return null;
+      });
+  }
+
+  getSlackFile(slackUrl: string) {
+    const _id = this.getSlackFileId(slackUrl);
+    return this.db
+      .get(_id)
+      .then((res) => res as SlackFileRecord)
+      .catch((e) => {
+        debug(`Response: ${e}`);
+        return null;
+      });
+  }
+
+  private getSlackFileId(slackUrl: string) {
+    return pouchCollate.toIndexableString([DocType.SlackFile, slackUrl]);
+  }
+
   private getArchivedConversationId(thread_ts: string) {
     return pouchCollate.toIndexableString([
       DocType.ArchivedConversation,
@@ -228,4 +261,15 @@ export interface IncrementalUpdatePostDeleted
   _id: string;
   type: DocType.IncrementalUpdatePostDeleted;
   archivedAt: string;
+}
+
+export interface SlackFile {
+  slackUrl: string;
+  data?: string;
+  discourseUrl?: string;
+}
+
+export interface SlackFileRecord extends SlackFile {
+  _id: string;
+  type: DocType.SlackFile;
 }

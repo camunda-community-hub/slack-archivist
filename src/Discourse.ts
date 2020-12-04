@@ -104,4 +104,22 @@ export class DiscourseAPI {
         return false as false;
       });
   }
+
+  async uploadFile(file: string) {
+    return this.limit.runRateLimited({
+      task: () =>
+        this.http
+          .post("/uploads.json", {
+            file,
+            synchronous: true,
+          })
+          .then(({ data }) => ({
+            url: data.url,
+          }))
+          .catch((e) => {
+            console.error("Error uploading file to Discourse", e);
+            return null;
+          }),
+    });
+  }
 }

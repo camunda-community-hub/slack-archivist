@@ -13,13 +13,13 @@ export type ChannelCache = { [channelcode: string]: Channelname };
 
 // Caches the user list for 24 hours for performance and to avoid rate-limiting
 export class UserNameLookupService {
-  slackWeb: WebClient;
+  private slackWeb: WebClient;
   private userCache: UserCache;
-  channelCache: ChannelCache;
-  ready: Promise<void>;
-  botname: string;
+  private channelCache: ChannelCache;
+  private ready: Promise<void>;
+  private botname: string;
   private botId!: string;
-  log!: winston.Logger;
+  private log!: winston.Logger;
   constructor(slackWeb: WebClient, slackConfig: SlackConfigObject) {
     this.slackWeb = slackWeb;
     this.userCache = {};
