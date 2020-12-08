@@ -4,11 +4,13 @@ import fs from "fs";
 import path from "path";
 import { getLogger } from "./lib/Log";
 import winston from "winston";
+import { reverse } from "dns";
 
 const debug = require("debug")("db");
 
 const pouchCollate = require("pouchdb-collate");
 PouchDB.plugin(require("pouchdb-find"));
+PouchDB.plugin(require("pouchdb-upsert"));
 
 export type DB = PouchDB.Database<
   | ArchivedConversation
@@ -101,9 +103,9 @@ export class _DBWrapper {
         //   .then((res) => console.log(JSON.stringify(res, null, 2))); // @DEBUG
       }
       this.db.info().then((res) => log.info("Database info:", { meta: res }));
-      this.db
-        .allDocs({ include_docs: true })
-        .then((docs) => debug("allDocs", JSON.stringify(docs, null, 2))); // @DEBUG
+      // this.db
+      //   .allDocs({ include_docs: true })
+      //   .then((docs) => debug("allDocs", JSON.stringify(docs, null, 2))); // @DEBUG
     });
   }
 
@@ -183,23 +185,23 @@ export class _DBWrapper {
       );
   }
 
-  async saveSlackFile(fileRecord: SlackFileRecord | SlackFile) {
+  async saveSlackFile(fileRecord: SlackFile) {
     const _id = this.getSlackFileId(fileRecord.slackUrl);
-    const record = {
-      ...fileRecord,
-      type: DocType.SlackFile as DocType.SlackFile,
-      _id,
-    };
     try {
-      await this.db.put(record);
-      return record as SlackFileRecord;
+      await this.db.upsert(_id, (rec) => ({
+        ...rec,
+        ...fileRecord,
+        _id,
+        type: DocType.SlackFile,
+      }));
+      return fileRecord;
     } catch (e) {
       this.log.error(e);
       this.log.error(
         `Posting ${JSON.stringify(
           {
-            ...record,
-            data: record.data ? "erased" : "missing",
+            ...fileRecord,
+            data: fileRecord.data ? "erased" : "missing",
           },
           null,
           2
@@ -213,7 +215,7 @@ export class _DBWrapper {
     const _id = this.getSlackFileId(slackUrl);
     return this.db
       .get(_id)
-      .then((res) => res as SlackFileRecord)
+      .then((res) => res as SlackFile)
       .catch((e) => {
         debug(`Response: ${e}`);
         return null;

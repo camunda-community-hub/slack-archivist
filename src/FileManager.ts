@@ -1,11 +1,11 @@
 import { DiscourseAPI } from "./Discourse";
-import { SlackFileRecord, _DBWrapper } from "./DB";
-import { FileUpload, ParsedMessage } from "./PostBuilder";
+import { SlackFile, _DBWrapper } from "./DB";
+import { FileUpload } from "./PostBuilder";
 import Axios from "axios";
 import { getLogger } from "./lib/Log";
 import winston from "winston";
 import { SlackMessageEvent } from "./lib/SlackMessage";
-const debug = require("debug")("db");
+const debug = require("debug")("filemanager");
 
 export class FileManager {
   private slackToken: string;
@@ -55,16 +55,19 @@ export class FileManager {
           2
         )}`
       );
-      if (file.discourseUrl) {
+      if (fileFromDB.discourseUrl) {
         return fileFromDB;
       } else {
         debug("No discourseUrl...");
-        const hasData = !!file.data;
+        const hasData = !!fileFromDB.data;
         debug(`Has downloaded data: ${hasData}`);
-        const fileDownload = hasData
-          ? fileFromDB
-          : await this.getFileFromSlack(fileFromDB);
-        return fileDownload ? this.postFileToDiscourse(fileDownload) : file;
+        if (hasData) {
+          return fileFromDB;
+        }
+        const fileDownload = await this.getFileFromSlack(fileFromDB);
+        return fileDownload
+          ? this.postFileToDiscourse(fileDownload)
+          : fileFromDB;
       }
     }
     debug(`Not found in database`);
@@ -75,16 +78,18 @@ export class FileManager {
   private async getFileFromSlack(file: FileUpload) {
     this.log.info(`Downloading image ${file.slackUrl} from Slack...`);
     return Axios.get(file.slackUrl, {
+      responseType: "arraybuffer",
       headers: { Authorization: "Bearer " + this.slackToken },
-    }).then((res) =>
-      this.db.saveSlackFile({
+    }).then((res) => {
+      debug("Slack File data", res.data);
+      return this.db.saveSlackFile({
         ...file,
         data: res.data,
-      })
-    );
+      });
+    });
   }
 
-  private async postFileToDiscourse(file: SlackFileRecord) {
+  private async postFileToDiscourse(file: SlackFile) {
     this.log.info(`Posting ${file.slackUrl} to Discourse`);
     const discourseRes = await this.discourseAPI.uploadFile(file);
     this.log.info(`Posted to Discourse as ${discourseRes}`);

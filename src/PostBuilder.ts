@@ -1,4 +1,3 @@
-// import { SlackMessageEvent } from "./lib/SlackMessage";
 import { FileManager } from "./FileManager";
 import { SlackMessageEvent } from "./lib/SlackMessage";
 
@@ -82,17 +81,12 @@ export class PostBuilder {
       await this.replaceUsercodesWithNames(this.threadMessages(messages))
     );
 
-    // tslint:disable-next-line: no-console
-    // console.log("threadedConversation", threadedConversation); // @DEBUG
     // Deal with pictures
     const convWithPictures = await this.fileManager.getFiles(
       threadedConversation
     );
 
-    // tslint:disable-next-line: no-console
-    // console.log("convWithPictures", JSON.stringify(convWithPictures, null, 2)); // @DEBUG
-
-    const markdownPost = threadedConversation.reduce(
+    const markdownPost = convWithPictures.reduce(
       (prev, message) => `${prev}${this.fileUploadstoMarkdown(message)}
 
 **${message.user}**: ${message.text}`,

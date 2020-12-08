@@ -26,6 +26,7 @@
     "@slack/events-api": "^2.3.1",
     "@slack/interactive-messages": "^1.7.0",
     "@slack/web-api": "^5.7.0",
+    "@types/pouchdb-upsert": "^2.2.6",
     "axios": "^0.19.2",
     "chalk": "^3.0.0",
     "debug": "^3.1.0",
@@ -40,6 +41,7 @@
     "pouchdb-collate": "^7.2.2",
     "pouchdb-find": "^7.2.2",
     "pouchdb-node": "^7.2.2",
+    "pouchdb-upsert": "^2.2.0",
     "seratch-slack-types": "^0.6.0",
     "winston": "^3.3.3"
   },
@@ -51,6 +53,7 @@
     "jest": "^25.1.0",
     "prettier": "^2.1.2",
     "ts-jest": "^25.5.1",
+    "ts-node": "^9.1.1",
     "typescript": "^3.9.7"
   }
 }

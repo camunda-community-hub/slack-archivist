@@ -36,6 +36,12 @@ export class DiscourseAPI {
         Accept: "application/json",
       },
     });
+    this.http.interceptors.request.use((config) => {
+      if (config.data instanceof FormData) {
+        Object.assign(config.headers, config.data.getHeaders());
+      }
+      return config;
+    });
     this.limit = new RateLimiter(500);
   }
 
@@ -108,16 +114,21 @@ export class DiscourseAPI {
 
   async uploadFile(file: FileUpload) {
     const form = new FormData();
-    form.append("type", "composer");
-    form.append("synchronous", "true");
-    form.append("files[]", this.stringToBinary(file.data), {
-      contentType: file.mimetype,
+    form.append("files[]", file.data, {
+      filename: file.slackUrl,
     });
+    // form.append("type", "composer");
+    // form.append("synchronous", "true");
+
     return this.limit.runRateLimited({
       task: () =>
         this.http
-          .post("/uploads.json", form.getBuffer(), {
-            headers: form.getHeaders(),
+          // multipart/form-data
+          .post("/uploads.json", form, {
+            params: {
+              type: "composer",
+              synchronous: true,
+            },
           })
           .then(({ data }) => {
             console.info(
@@ -129,20 +140,12 @@ export class DiscourseAPI {
             };
           })
           .catch((e) => {
-            console.error("Error uploading file to Discourse", e.message);
+            console.error(
+              "Error uploading file to Discourse",
+              JSON.stringify(e, null, 2)
+            );
             throw e;
           }),
-    });
-  }
-
-  private stringToBinary(str, spaceSeparatedOctets?) {
-    function zeroPad(num) {
-      return "00000000".slice(String(num).length) + num;
-    }
-
-    return str.replace(/[\s\S]/g, function (str) {
-      str = zeroPad(str.charCodeAt().toString(2));
-      return !1 == spaceSeparatedOctets ? str : str + " ";
     });
   }
 }
