@@ -66,19 +66,6 @@ async function main() {
     }),
   });
 
-  // @debug
-  new PostBuilder({
-    slackPromoMessage: promoText,
-    userMap: userlookup,
-    fileManager,
-    messages: [],
-    botId: await userlookup.getBotUserId(),
-  })
-    .buildMarkdownPostFromConversation(TestConversation as any)
-    .then(console.log);
-
-  // @debug
-
   incrementalUpdater.start();
 
   // Listens to all messages - **including app mentions**
