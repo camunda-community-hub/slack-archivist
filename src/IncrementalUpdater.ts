@@ -97,6 +97,10 @@ export class IncrementalUpdater {
         };
         const discoursePostFailed = (e: Error) => {
           this.log.error("Error posting to Discourse", { meta: e });
+          if (e.message.includes("status code 422")) {
+            // Unprocessable Entity - happens if the thread was deleted
+            this.db.discardPendingIncrementalUpdate(doc);
+          }
           // TODO: discardPendingIncrementalUpdate if post gone
         };
         fold(discoursePostFailed, discoursePostSucceeded)(res);
