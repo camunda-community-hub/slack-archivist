@@ -49,8 +49,12 @@ export class PostBuilder {
   }) {
     this.slackPromoMessage = slackPromoMessage;
     this.userMap = userMap;
-    // Remove any previous messages from the bot
-    this.messages = messages?.filter((msg) => msg.user !== botId) || [];
+
+    // Remove any previous messages from the bot, or to the bot
+    this.messages =
+      messages?.filter(
+        (msg) => msg.user !== botId || msg.text.includes(`<@${botId}>`)
+      ) || [];
     this.fileManager = fileManager;
     debug("Input messages: %O", JSON.stringify(messages, null, 2));
   }
