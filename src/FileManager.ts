@@ -56,19 +56,16 @@ export class FileManager {
         )}`
       );
       if (fileFromDB.discourseUrl) {
+        this.log.info(`Has discourseUrl`);
         return fileFromDB;
-      } else {
-        debug("No discourseUrl...");
-        const hasData = !!fileFromDB.data;
-        debug(`Has downloaded data: ${hasData}`);
-        if (hasData) {
-          return fileFromDB;
-        }
-        const fileDownload = await this.getFileFromSlack(fileFromDB);
-        return fileDownload
-          ? this.postFileToDiscourse(fileDownload)
-          : fileFromDB;
       }
+      debug("No discourseUrl...");
+      const hasData = !!fileFromDB.data;
+      debug(`Has downloaded data: ${hasData}`);
+      const fileDownload = hasData
+        ? fileFromDB
+        : await this.getFileFromSlack(fileFromDB);
+      return fileDownload ? this.postFileToDiscourse(fileDownload) : fileFromDB;
     }
     debug(`Not found in database`);
     const fileWithDownload = await this.getFileFromSlack(file);
