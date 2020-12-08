@@ -5,6 +5,8 @@ import Axios, { AxiosInstance } from "axios";
 import * as E from "fp-ts/Either";
 import { DiscourseConfigObject } from "./lib/Configuration";
 import { RateLimiter } from "./lib/Ratelimiter";
+import FormData from "form-data";
+import { FileUpload } from "./PostBuilder";
 
 const debug = require("debug")("discourse");
 
@@ -33,6 +35,12 @@ export class DiscourseAPI {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
+    });
+    this.http.interceptors.request.use((config) => {
+      if (config.data instanceof FormData) {
+        Object.assign(config.headers, config.data.getHeaders());
+      }
+      return config;
     });
     this.limit = new RateLimiter(500);
   }
@@ -91,7 +99,6 @@ export class DiscourseAPI {
 
   async getPost(topic_id: number) {
     const req = `/t/${topic_id}.json`;
-    debug(`Request url: ${req}`);
     return this.limit
       .runRateLimited({
         task: () => this.http.get(req),
@@ -103,5 +110,42 @@ export class DiscourseAPI {
         }
         return false as false;
       });
+  }
+
+  async uploadFile(file: FileUpload) {
+    const form = new FormData();
+    form.append("files[]", file.data, {
+      filename: file.slackUrl,
+    });
+    // form.append("type", "composer");
+    // form.append("synchronous", "true");
+
+    return this.limit.runRateLimited({
+      task: () =>
+        this.http
+          // multipart/form-data
+          .post("/uploads.json", form, {
+            params: {
+              type: "composer",
+              synchronous: true,
+            },
+          })
+          .then(({ data }) => {
+            console.info(
+              "Response from Discourse",
+              JSON.stringify(data, null, 2)
+            );
+            return {
+              url: data.url,
+            };
+          })
+          .catch((e) => {
+            console.error(
+              "Error uploading file to Discourse",
+              JSON.stringify(e, null, 2)
+            );
+            throw e;
+          }),
+    });
   }
 }

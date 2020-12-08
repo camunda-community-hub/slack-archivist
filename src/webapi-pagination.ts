@@ -1,4 +1,8 @@
-export async function getAll(fn, query: object, payloadKey: string) {
+export async function getAll<T>(
+  fn: (payload: any) => T,
+  query: object,
+  payloadKey: string
+) {
   let error;
   let cursor;
   let results: any[] = [];
@@ -30,7 +34,7 @@ interface WebAPIPageResult {
 async function getNextPageOfWebAPIResults({
   fn,
   query,
-  cursor
+  cursor,
 }: {
   fn: any;
   query: object;
@@ -39,14 +43,14 @@ async function getNextPageOfWebAPIResults({
   const payload = {
     limit: 20,
     cursor,
-    ...query
+    ...query,
   };
   const page = await fn(payload);
   if (page.ok) {
     return {
       page,
       cursor: page.response_metadata?.next_cursor,
-      isError: false
+      isError: false,
     };
   }
   return { error: page.error, isError: true };

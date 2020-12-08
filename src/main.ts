@@ -20,6 +20,8 @@ import { IncrementalUpdater } from "./IncrementalUpdater";
 import http from "http";
 import express from "express";
 import bodyParser from "body-parser";
+import { FileManager } from "./FileManager";
+import { TestConversation } from "./test-data/test-conversation";
 
 const debug = require("debug")("main");
 
@@ -42,19 +44,40 @@ async function main() {
   const { slackEvents, slackWeb, slackInteractions } = getSlack(
     configuration.slack
   );
+
+  const fileManager = new FileManager({
+    slackToken: configuration.slack.token,
+    db,
+    discourseAPI,
+  });
+
   const userlookup = new UserNameLookupService(slackWeb, configuration.slack);
 
   const botId = await userlookup.getBotUserId();
   const incrementalUpdater = new IncrementalUpdater({
     db,
-    discourseAPI: discourseAPI,
+    discourseAPI,
     postBuilder: new PostBuilder({
       slackPromoMessage: promoText,
       userMap: userlookup,
       messages: [],
       botId: await userlookup.getBotUserId(),
+      fileManager,
     }),
   });
+
+  // @debug
+  new PostBuilder({
+    slackPromoMessage: promoText,
+    userMap: userlookup,
+    fileManager,
+    messages: [],
+    botId: await userlookup.getBotUserId(),
+  })
+    .buildMarkdownPostFromConversation(TestConversation as any)
+    .then(console.log);
+
+  // @debug
 
   incrementalUpdater.start();
 
@@ -174,6 +197,7 @@ async function main() {
     const postBuilder = new PostBuilder({
       slackPromoMessage: promoText,
       userMap: userlookup,
+      fileManager,
       messages: await getAll(
         slackWeb.conversations.replies,
         {
@@ -204,7 +228,7 @@ async function main() {
       }
     }
 
-    const discoursePost = await postBuilder.buildMarkdownPost();
+    const discoursePost = await postBuilder.buildMarkdownPostFromConversation();
 
     log.info("Title", { meta: title }); // @DEBUG
     log.info("Post", { meta: discoursePost }); // @DEBUG
