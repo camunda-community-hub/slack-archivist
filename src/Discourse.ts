@@ -65,7 +65,7 @@ export class DiscourseAPI {
               topic_id: data.topic_id,
             })
           )
-          .catch((e) => E.left(new Error(e?.response?.data?.errors || e))),
+          .catch((e) => E.left(e)),
     });
   }
 
