@@ -97,6 +97,7 @@ export class IncrementalUpdater {
         };
         const discoursePostFailed = (e: Error) => {
           this.log.error("Error posting to Discourse", { meta: e });
+          // TODO: discardPendingIncrementalUpdate if post gone
         };
         fold(discoursePostFailed, discoursePostSucceeded)(res);
       });
