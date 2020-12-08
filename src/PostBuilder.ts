@@ -87,9 +87,9 @@ export class PostBuilder {
     );
 
     const markdownPost = convWithPictures.reduce(
-      (prev, message) => `${prev}${this.fileUploadstoMarkdown(message)}
+      (prev, message) => `${prev}
 
-**${message.user}**: ${message.text}`,
+**${message.user}**: ${message.text}${this.fileUploadstoMarkdown(message)}`,
       ""
     );
 
