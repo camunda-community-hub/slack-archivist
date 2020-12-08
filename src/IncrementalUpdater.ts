@@ -99,6 +99,10 @@ export class IncrementalUpdater {
           this.log.error("Error posting to Discourse", { meta: e });
           if (e.message.includes("status code 422")) {
             // Unprocessable Entity - happens if the thread was deleted
+            this.log.info(
+              "Looks like the post was deleted in Discourse - discarding update."
+            );
+            this.log.info(doc.message);
             this.db.discardPendingIncrementalUpdate(doc);
           }
           // TODO: discardPendingIncrementalUpdate if post gone
