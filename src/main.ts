@@ -215,7 +215,19 @@ async function main() {
       }
     }
 
-    const discoursePost = await postBuilder.buildMarkdownPostFromConversation();
+    let discoursePost;
+    try {
+      discoursePost = await postBuilder.buildMarkdownPostFromConversation();
+    } catch (e) {
+      slackWeb.chat.postEphemeral({
+        user: event.user,
+        thread_ts: event.thread_ts,
+        channel: event.channel,
+        text: `Sorry! I couldn't archive that. I encountered an error: ${JSON.stringify(
+          e.message
+        )}`,
+      });
+    }
 
     log.info("Title", { meta: title }); // @DEBUG
     log.info("Post", { meta: discoursePost }); // @DEBUG
