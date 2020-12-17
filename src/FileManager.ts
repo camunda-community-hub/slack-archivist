@@ -49,6 +49,18 @@ export class FileManager {
       // This will happen if a file is deleted
       return file;
     }
+    if (
+      !(
+        file.slackUrl.endsWith(".png") ||
+        file.slackUrl.endsWith(".jpg") ||
+        file.slackUrl.endsWith(".jpeg") ||
+        file.slackUrl.endsWith(".gif")
+      )
+    ) {
+      // Only download images - discourse cannot upload other file types
+      // @TODO: download .bpmn files and convert to inline markup in the post
+      return file;
+    }
     this.log.info(`Getting ${file.slackUrl} from database...`);
     const fileFromDB = await this.db.getSlackFile(file.slackUrl);
     if (fileFromDB) {
@@ -77,7 +89,7 @@ export class FileManager {
   }
 
   private async getFileFromSlack(file: FileUpload) {
-    this.log.info(`Downloading image ${file.slackUrl} from Slack...`);
+    this.log.info(`Downloading file ${file.slackUrl} from Slack...`);
     return Axios.get(file.slackUrl, {
       responseType: "arraybuffer",
       headers: { Authorization: "Bearer " + this.slackToken },
