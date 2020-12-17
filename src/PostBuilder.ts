@@ -85,12 +85,10 @@ export class PostBuilder {
       await this.replaceUsercodesWithNames(this.threadMessages(messages))
     );
 
-    // Deal with pictures
-    const convWithPictures = await this.fileManager.getFiles(
-      threadedConversation
-    );
+    // Deal with files, such as images or model files
+    const convWithFiles = await this.fileManager.getFiles(threadedConversation);
 
-    const markdownPost = convWithPictures.reduce(
+    const markdownPost = convWithFiles.reduce(
       (prev, message) => `${prev}
 
 **${message.user}**: ${message.text}${this.fileUploadstoMarkdown(message)}`,

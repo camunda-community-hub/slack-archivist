@@ -45,6 +45,10 @@ export class FileManager {
   }
 
   private async getFile(file: FileUpload) {
+    if (!file.slackUrl) {
+      // This will happen if a file is deleted
+      return file;
+    }
     this.log.info(`Getting ${file.slackUrl} from database...`);
     const fileFromDB = await this.db.getSlackFile(file.slackUrl);
     if (fileFromDB) {
