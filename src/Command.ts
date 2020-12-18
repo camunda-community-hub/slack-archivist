@@ -23,7 +23,7 @@ export async function executeCommand({
         text: helpText,
       });
     }
-    case "capture": {
+    case "test": {
       if (!event.thread_ts) {
         return slackWeb.chat.postEphemeral({
           user: event.user,
@@ -38,7 +38,7 @@ export async function executeCommand({
           user: event.user,
           channel: event.channel,
           thread_ts: event.thread_ts,
-          text: discoursePost,
+          text: `# Test Post content\n\n${discoursePost}`,
         });
       } catch (e) {
         return slackWeb.chat.postEphemeral({
