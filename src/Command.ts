@@ -34,6 +34,7 @@ export async function executeCommand({
       }
       try {
         const discoursePost = await postBuilder.buildMarkdownPostFromConversation();
+        console.log(discoursePost);
         return slackWeb.chat.postEphemeral({
           user: event.user,
           channel: event.channel,
