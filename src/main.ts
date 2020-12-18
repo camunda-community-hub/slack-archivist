@@ -148,18 +148,33 @@ async function main() {
       );
     const msg = removeBotnameTag(event.text, await userlookup.getBotUserId());
 
+    const thread_ts = event.thread_ts;
+
     if (isCommand(msg)) {
       const command = parseCommand(msg);
+      const postBuilder = new PostBuilder({
+        slackPromoMessage: promoText,
+        userMap: userlookup,
+        fileManager,
+        messages: await getAll(
+          slackWeb.conversations.replies,
+          {
+            channel: event.channel,
+            ts: thread_ts,
+          },
+          "messages"
+        ),
+        botId: await userlookup.getBotUserId(),
+      });
       return executeCommand({
         command,
         event,
         slackWeb,
+        postBuilder,
       });
     }
 
-    const thread_ts = event.thread_ts;
-
-    if (!thread_ts) {
+    if (!isThreadedMessage(event)) {
       log.info("Is not a threaded message!");
       return slackWeb.chat.postEphemeral({
         user: event.user,
