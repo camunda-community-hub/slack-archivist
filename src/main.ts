@@ -135,7 +135,6 @@ async function main() {
 
   /** Archive a thread */
   slackEvents.on("app_mention", async (event: SlackMessageEvent) => {
-    const isThreadedMessage = (event: SlackMessageEvent) => !!event.thread_ts;
     // Make sure the bot is in the channel
     slackWeb.conversations
       .join({
@@ -174,7 +173,7 @@ async function main() {
       });
     }
 
-    if (!isThreadedMessage(event)) {
+    if (!thread_ts) {
       log.info("Is not a threaded message!");
       return slackWeb.chat.postEphemeral({
         user: event.user,
