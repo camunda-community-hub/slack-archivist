@@ -3,31 +3,6 @@ import { SlackMessageEvent } from "./lib/SlackMessage";
 
 const debug = require("debug")("postbuilder");
 
-export interface FileUpload {
-  slackUrl: string;
-  data?: string;
-  discourseUrl?: string;
-  mimetype: string;
-}
-
-export interface ParsedMessage {
-  text: string;
-  user: string;
-  fileUploads?: FileUpload[];
-}
-
-interface IUserNameLookupService {
-  getUserName: (usercode: string) => Promise<string>;
-}
-
-interface IDiscourseAPI {
-  uploadFile: (file: string) => Promise<{ url: string } | null>;
-}
-
-interface IFileManager {
-  getFiles(conversation: ParsedMessage[]): Promise<ParsedMessage[]>;
-}
-
 export class PostBuilder {
   private slackPromoMessage: string | undefined;
   private userMap: IUserNameLookupService;
@@ -126,36 +101,11 @@ export class PostBuilder {
       messageThread.map(async (message) => ({
         ...message,
         user: (await this.userMap.getUserName(message.user!)) ?? message.user,
-        text: this._addReturnForBackTicks(
+        text: _addReturnForBackTicks(
           await this.replaceUsercodesInText(message.text)
         ),
       }))
     );
-  }
-
-  _addTrailingReturnForBackTicks(text: string) {
-    if (text.length < 4) return text;
-    return text[3] === "\n" ? text : "```\n" + text.substr(3);
-  }
-
-  // A code sample block that starts at the beginning of a message needs a leading CR
-  _addReturnForBackTicks(text: string) {
-    const idx = text.indexOf("```");
-    if (idx === -1) {
-      return text;
-    }
-    if (idx === 0) {
-      text = this._addTrailingReturnForBackTicks(text);
-      return "\n\n```" + this._addReturnForBackTicks(text.substring(3));
-    } else {
-      return text[idx - 1] === "\n"
-        ? text.substr(0, idx) +
-            "```" +
-            this._addReturnForBackTicks(text.substr(idx + 3))
-        : text.substr(0, idx) +
-            "\n```" +
-            this._addReturnForBackTicks(text.substr(idx + 3));
-    }
   }
 
   async replaceUsercodesInText(text: string): Promise<string> {
@@ -175,4 +125,61 @@ export class PostBuilder {
     }
     return text;
   }
+}
+
+// Recursively ensure that all backticks have newlines before and after them
+export function _addReturnForBackTicks(text: string) {
+  const index = text.indexOf("```");
+  if (index === -1) {
+    return text;
+  }
+  if (index === 0) {
+    // A message that starts with a code block needs two newlines
+    return _addReturnForBackTicks(`\n\n${text}`);
+  }
+  const before = index - 1;
+  const after = index + 3;
+  if (text.substr(before, 1) !== "\n") {
+    // Add a newline before triple backticks
+    return (
+      text.substring(0, index) +
+      "\n```" +
+      _addReturnForBackTicks(text.substr(after))
+    );
+  }
+  // Add a newline after triple backticks
+  return text.substr(after, 1) === "\n"
+    ? text.substring(0, after) + _addReturnForBackTicks(text.substr(after))
+    : text.substring(0, after) +
+        "\n" +
+        _addReturnForBackTicks(text.substr(after));
+}
+
+/**
+ *
+ * This function is unused, but shows how to insert a character in a string
+ */
+// export function _insertNewlineAt(text, index) {
+//   return text.substring(0, index) + "\n" + text.substr(index);
+// }
+
+export interface FileUpload {
+  slackUrl: string;
+  data?: string;
+  discourseUrl?: string;
+  mimetype: string;
+}
+
+export interface ParsedMessage {
+  text: string;
+  user: string;
+  fileUploads?: FileUpload[];
+}
+
+interface IUserNameLookupService {
+  getUserName: (usercode: string) => Promise<string>;
+}
+
+interface IFileManager {
+  getFiles(conversation: ParsedMessage[]): Promise<ParsedMessage[]>;
 }
