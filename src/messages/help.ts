@@ -12,7 +12,12 @@ When you tag me, put the text you want as the post title. For example:
 
 I don't respond to DMs, but you can chat to me in #archivist.
 
-[Read more in the forum](https://forum.zeebe.io/t/about-the-knowledge-from-slack-category/976).`;
+[Read more in the forum](https://forum.zeebe.io/t/about-the-knowledge-from-slack-category/976).
+
+## Commands
+
+**--help**: emit this help message
+**--capture**: build a post and put it as a reply visible only to you. This is useful for testing.`;
 
 export const notThreadedMessage =
   "Tag me _in a threaded reply_ with what you want as the post title, and I'll put the thread in the Forum for you. If there are no replies, you can reply to the OP (your reply makes a thread) and tag me in that reply.";
