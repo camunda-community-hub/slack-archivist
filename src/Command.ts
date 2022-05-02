@@ -41,7 +41,7 @@ export async function executeCommand({
           thread_ts: event.thread_ts,
           text: `# Test Post content\n\n${discoursePost}`,
         });
-      } catch (e) {
+      } catch (e: any) {
         return slackWeb.chat.postEphemeral({
           user: event.user,
           thread_ts: event.thread_ts,

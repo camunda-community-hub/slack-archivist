@@ -1,6 +1,6 @@
 export const helpText = `Hi, I'm the Slack Archivist.
 
-I can send useful conversation threads to the [Zeebe forum](https://forum.zeebe.io), to capture valuable information. 
+I can send useful conversation threads to the [Camunda forum](https://forum.camunda.io), to capture valuable information. 
 
 When you see a thread worth capturing, tag me with @archivist in a reply to the conversation, and I'll send the thread to the forum, and keep watching it for updates. 
   
@@ -12,7 +12,7 @@ When you tag me, put the text you want as the post title. For example:
 
 I don't respond to DMs, but you can chat to me in #archivist.
 
-[Read more in the forum](https://forum.zeebe.io/t/about-the-knowledge-from-slack-category/976).
+[Read more in the forum](https://forum.camunda.io/t/about-the-knowledge-from-camunda-platform-8-slack-category/36873).
 
 ## Commands
 

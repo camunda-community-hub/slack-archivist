@@ -22,6 +22,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import { FileManager } from "./FileManager";
 import { TestConversation } from "./test-data/test-conversation";
+import { kill } from "process";
 
 const debug = require("debug")("main");
 
@@ -215,6 +216,7 @@ async function main() {
     if (existingPostFromDb) {
       const doc = existingPostFromDb;
       const existingPost = await discourseAPI.getPost(doc.topic_id);
+      // TODO: Examine response to handle deleted posts (which return 200 for a while)
       if (existingPost && existingPost.status === 200) {
         return slackWeb.chat.postEphemeral({
           user: event.user,
@@ -232,7 +234,7 @@ async function main() {
     let discoursePost;
     try {
       discoursePost = await postBuilder.buildMarkdownPostFromConversation();
-    } catch (e) {
+    } catch (e: any) {
       slackWeb.chat.postEphemeral({
         user: event.user,
         thread_ts: event.thread_ts,
