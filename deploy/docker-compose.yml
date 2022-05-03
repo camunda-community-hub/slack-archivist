@@ -9,9 +9,9 @@ services:
     container_name: slack-archivist
     environment:
       - VIRTUAL_PORT=3000
-      - VIRTUAL_HOST=slack-archivist.joshwulf.com
-      - LETSENCRYPT_HOST=slack-archivist.joshwulf.com
-      - LETSENCRYPT_EMAIL=josh@magikcraft.io
+      - VIRTUAL_HOST=${SLACKBOT_DOMAIN}
+      - LETSENCRYPT_HOST=${SLACKBOT_DOMAIN}
+      - LETSENCRYPT_EMAIL=${SLACKBOT_DOMAIN_ADMIN_EMAIL}
       - DEBUG=main,db,updates,postbuilder,db,discourse
     volumes:
       - "${PWD}/.env:/usr/src/app/.env"

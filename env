@@ -11,3 +11,6 @@ DISCOURSE_CATEGORY=16
 COUCHDB_URL=http://username:password@url/database_name
 
 LOG_LEVEL=info
+
+SLACKBOT_DOMAIN=ccs-sa-bot.camunda.com
+SLACKBOT_DOMAIN_ADMIN_EMAIL=someone@somewhere.com
