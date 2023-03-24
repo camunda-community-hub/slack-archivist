@@ -143,3 +143,7 @@ I livestreamed a lot of the coding:
 ## Resources
 
 - [Slack event JSON Schema](https://github.com/slackapi/slack-api-specs/blob/master/events-api/slack_common_event_wrapper_schema.json)
+
+## Questions?
+
+Come by #nodejs on the [Camunda 8 Slack](https://www.camunda.com/slack).
