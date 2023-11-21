@@ -42,7 +42,7 @@
     "pouchdb-find": "^7.2.2",
     "pouchdb-node": "^7.2.2",
     "pouchdb-upsert": "^2.2.0",
-    "seratch-slack-types": "^0.6.0",
+    "seratch-slack-types": "^0.9.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {
