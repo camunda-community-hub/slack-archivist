@@ -15,7 +15,7 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       - name: Publish Docker image to Registry
-        uses: elgohr/Publish-Docker-Github-Action@2.12
+        uses: elgohr/Publish-Docker-Github-Action@v5
         with:
           name: sitapati/slack-archivist
           username: ${{ secrets.DOCKER_USERNAME }}
